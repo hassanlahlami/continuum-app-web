@@ -13,6 +13,10 @@ tmp/
 .angular/
 *.tsbuildinfo
 
+# --- Clients API générés depuis les contrats (D32) : régénérés, non commités ---
+libs/api-clients/*/
+.openapi-generator-cli/
+
 # --- Tests ---
 coverage/
 apps/*-e2e/cypress/videos/
