@@ -12,5 +12,5 @@
     "noEmit": true,
     "types": []
   },
-  "include": ["libs/api-clients/**/*.ts"]
+  "include": ["src/**/*.ts", "libs/api-clients/**/*.ts"]
 }
