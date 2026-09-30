@@ -1,0 +1,8 @@
+{
+  "name": "ui-kit",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/ui-kit/src",
+  "tags": ["type:ui-kit"],
+  "//": "Design system interne (Storybook). Composants pilotés UNIQUEMENT par tokens --ct-* (§1.6). Aucune valeur visuelle en dur (lint Stylelint bloquant)."
+}

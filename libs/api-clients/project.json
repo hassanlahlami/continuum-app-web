@@ -1,0 +1,8 @@
+{
+  "name": "api-clients",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/api-clients/src",
+  "tags": ["type:api-client"],
+  "//": "Clients TypeScript GÉNÉRÉS depuis contracts/openapi (D32). Un dossier par fichier de contrat = un module. Jamais d'appel HTTP écrit à la main."
+}

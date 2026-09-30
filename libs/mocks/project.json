@@ -1,0 +1,8 @@
+{
+  "name": "mocks",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/mocks/src",
+  "tags": ["type:mocks"],
+  "//": "Handlers MSW (front-first GUIDE §6). Un dossier par fichier de contrat. Chaque opération couvre nominal + 403/404/409/422/SoD/lent/vide. Config 'mock' uniquement."
+}

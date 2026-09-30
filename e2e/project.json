@@ -1,0 +1,9 @@
+{
+  "name": "app-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/app-e2e/src",
+  "implicitDependencies": ["app"],
+  "tags": ["platform:app", "type:e2e"],
+  "//": "Cypress (D36). Un fichier par identifiant de page : cypress/e2e/MIS-03-*.cy.ts. Sélecteurs data-cy uniquement."
+}
