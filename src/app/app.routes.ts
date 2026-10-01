@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { requireFeature } from './guards/require-feature.guard';
+import { MissionDetailPage } from './pages/mission-detail.page';
 import { MissionsPage } from './pages/missions.page';
 import { MyPermissionsPage } from './pages/my-permissions.page';
 
@@ -7,4 +8,5 @@ import { MyPermissionsPage } from './pages/my-permissions.page';
 export const routes: Routes = [
   { path: '', pathMatch: 'full', component: MyPermissionsPage },
   { path: 'missions', canMatch: [requireFeature('mission.read')], component: MissionsPage },
+  { path: 'missions/:id', canMatch: [requireFeature('mission.read')], component: MissionDetailPage },
 ];

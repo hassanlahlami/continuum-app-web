@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { MissionPage } from '../../../libs/api-clients/missions';
 import { MissionsFacade } from '../missions.facade';
 
@@ -9,6 +10,7 @@ import { MissionsFacade } from '../missions.facade';
 @Component({
   selector: 'ct-missions',
   standalone: true,
+  imports: [RouterLink],
   template: `
     <section>
       <h1>Missions</h1>
@@ -21,7 +23,7 @@ import { MissionsFacade } from '../missions.facade';
             <tbody>
               @for (mission of p.items; track mission.id) {
                 <tr>
-                  <td><code>{{ mission.reference }}</code></td>
+                  <td><a [routerLink]="['/missions', mission.id]"><code>{{ mission.reference }}</code></a></td>
                   <td>{{ mission.title }}</td>
                   <td>{{ mission.status.label }}</td>
                   <td>{{ mission.progressPercent ?? 0 }}%</td>
