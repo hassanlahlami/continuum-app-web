@@ -8,6 +8,7 @@ import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
 import { authConfig } from './app/auth/auth.config';
 import { authInterceptor } from './app/auth/auth.interceptor';
+import { errorInterceptor } from './app/errors/error.interceptor';
 import { environment } from './environments/environment';
 
 /**
@@ -16,7 +17,7 @@ import { environment } from './environments/environment';
  */
 bootstrapApplication(AppComponent, {
   providers: [
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
     provideRouter(routes),
     provideOAuthClient(),
     { provide: BASE_PATH, useValue: environment.apiBaseUrl },
