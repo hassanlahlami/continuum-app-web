@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MissionPage } from '../../../libs/api-clients/missions';
 import { MissionsFacade } from '../missions.facade';
 
@@ -47,13 +47,23 @@ import { MissionsFacade } from '../missions.facade';
 })
 export class MissionsPage implements OnInit {
   private readonly facade = inject(MissionsFacade);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   readonly page = signal<MissionPage | null>(null);
 
   ngOnInit(): void {
-    this.go(0);
+    // La page courante est portée par l'URL (partageable) : on réagit à `?page=`.
+    this.route.queryParamMap.subscribe((params) => {
+      const index = Math.max(0, Number(params.get('page') ?? 0) || 0);
+      this.facade.list(index).subscribe((p) => this.page.set(p));
+    });
   }
 
   go(index: number): void {
-    this.facade.list(index).subscribe((p) => this.page.set(p));
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { page: index },
+      queryParamsHandling: 'merge',
+    });
   }
 }
