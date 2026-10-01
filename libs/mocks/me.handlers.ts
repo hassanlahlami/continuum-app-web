@@ -13,6 +13,7 @@ export const permissionsFixture: Permissions = {
   features: [
     { code: 'mission.read', scopes: [{ type: 'UNIT_TREE', id: INSPECTION_UNIT, label: 'Inspection Générale' }] },
     { code: 'finding.write', scopes: [{ type: 'MISSION', id: '9b2d7e4a-1c3f-4a6b-8d5e-7f0a1b2c3d4e', label: 'Inspection agence A001' }] },
+    { code: 'finding.read', scopes: [{ type: 'UNIT_TREE', id: INSPECTION_UNIT, label: 'Inspection Générale' }] },
   ],
 };
 
