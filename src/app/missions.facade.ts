@@ -7,8 +7,8 @@ import { Mission, MissionPage, MissionsService } from '../../libs/api-clients/mi
 export class MissionsFacade {
   private readonly api = inject(MissionsService);
 
-  list(): Observable<MissionPage> {
-    return this.api.listMissions();
+  list(page = 0, size = 20): Observable<MissionPage> {
+    return this.api.listMissions(page, size);
   }
 
   get(missionId: string): Observable<Mission> {

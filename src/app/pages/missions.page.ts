@@ -4,8 +4,8 @@ import { MissionPage } from '../../../libs/api-clients/missions';
 import { MissionsFacade } from '../missions.facade';
 
 /**
- * Liste des missions (archétype LISTE, §8) : missions du périmètre de l'utilisateur
- * (`GET /missions`, feature `mission.read`). Pagination/tri/filtres côté serveur (à brancher).
+ * Liste des missions (archétype LISTE, §8) : missions du périmètre, pagination **côté serveur**
+ * (`page`/`size`). Tri et filtres serveur à brancher ; reflet dans l'URL à suivre.
  */
 @Component({
   selector: 'ct-missions',
@@ -31,6 +31,11 @@ import { MissionsFacade } from '../missions.facade';
               }
             </tbody>
           </table>
+          <nav class="pager">
+            <button type="button" (click)="go(p.page - 1)" [disabled]="p.page <= 0">Précédent</button>
+            <span>Page {{ p.page + 1 }} / {{ p.totalPages }}</span>
+            <button type="button" (click)="go(p.page + 1)" [disabled]="p.page + 1 >= p.totalPages">Suivant</button>
+          </nav>
         } @else {
           <p>Aucune mission — créer un plan d'audit.</p>
         }
@@ -45,6 +50,10 @@ export class MissionsPage implements OnInit {
   readonly page = signal<MissionPage | null>(null);
 
   ngOnInit(): void {
-    this.facade.list().subscribe((p) => this.page.set(p));
+    this.go(0);
+  }
+
+  go(index: number): void {
+    this.facade.list(index).subscribe((p) => this.page.set(p));
   }
 }
