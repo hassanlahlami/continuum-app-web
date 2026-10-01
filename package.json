@@ -5,10 +5,13 @@
   "description": "Plateforme Fonctionnelle — front Angular (continuum-app-web). Client API généré depuis les contrats (D32).",
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
+    "compile:templates": "ngc -p tsconfig.app.json",
     "generate:me": "openapi-generator-cli generate -i ../continuum-backend/src/main/openapi/me.bundled.yaml -g typescript-angular -o libs/api-clients/me --additional-properties=ngVersion=19.0.0,supportsES6=true,withInterfaces=true"
   },
   "devDependencies": {
     "@angular/common": "^19.0.0",
+    "@angular/compiler": "^19.0.0",
+    "@angular/compiler-cli": "^19.0.0",
     "@angular/core": "^19.0.0",
     "@angular/platform-browser": "^19.0.0",
     "@openapitools/openapi-generator-cli": "^2.15.3",
