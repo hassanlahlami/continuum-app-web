@@ -14,7 +14,10 @@ import { PermissionsStore } from '../permissions.store';
   template: `
     <section>
       <h1>Mes droits</h1>
-      <a routerLink="/missions" *hasFeature="'mission.read'">Voir les missions</a>
+      <nav>
+        <a routerLink="/missions" *hasFeature="'mission.read'">Missions</a>
+        <a routerLink="/findings" *hasFeature="'finding.read'">Constats</a>
+      </nav>
       @if (store.permissions(); as p) {
         <p>Version d'habilitation : {{ p.authzVersion }}</p>
         <ul>
