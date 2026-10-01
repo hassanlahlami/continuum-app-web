@@ -6,7 +6,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "compile:templates": "ngc -p tsconfig.app.json",
-    "generate:me": "openapi-generator-cli generate -i ../continuum-backend/src/main/openapi/me.bundled.yaml -g typescript-angular -o libs/api-clients/me --additional-properties=ngVersion=19.0.0,supportsES6=true,withInterfaces=true"
+    "generate:me": "openapi-generator-cli generate -i ../continuum-backend/src/main/openapi/me.bundled.yaml -g typescript-angular -o libs/api-clients/me --additional-properties=ngVersion=19.0.0,supportsES6=true,withInterfaces=true",
+    "generate:missions": "redocly bundle ../Instructions/contracts/openapi/app/missions.yaml -o libs/.contracts/missions.bundled.yaml && openapi-generator-cli generate -i libs/.contracts/missions.bundled.yaml -g typescript-angular -o libs/api-clients/missions --additional-properties=ngVersion=19.0.0,supportsES6=true,withInterfaces=true"
   },
   "devDependencies": {
     "@angular/common": "^19.0.0",
