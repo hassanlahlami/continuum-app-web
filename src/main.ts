@@ -3,10 +3,12 @@ import { inject, provideAppInitializer } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { OAuthService, provideOAuthClient } from 'angular-oauth2-oidc';
+import { BASE_PATH } from '../libs/api-clients/me';
 import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
 import { authConfig } from './app/auth/auth.config';
 import { authInterceptor } from './app/auth/auth.interceptor';
+import { environment } from './environments/environment';
 
 /**
  * Amorçage de la Plateforme Fonctionnelle (§4.2, composants standalone) : HTTP + intercepteur de
@@ -17,6 +19,7 @@ bootstrapApplication(AppComponent, {
     provideHttpClient(withInterceptors([authInterceptor])),
     provideRouter(routes),
     provideOAuthClient(),
+    { provide: BASE_PATH, useValue: environment.apiBaseUrl },
     provideAppInitializer(() => {
       const oauth = inject(OAuthService);
       oauth.configure(authConfig);
