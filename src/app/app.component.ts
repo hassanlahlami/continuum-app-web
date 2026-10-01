@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Me } from '../../libs/api-clients/me';
+import { ApiErrorStore } from './errors/api-error.store';
 import { MeFacade } from './me.facade';
 
 /**
@@ -18,6 +19,13 @@ import { MeFacade } from './me.facade';
         <span>· {{ user.entity.label }}</span>
       }
     </header>
+    @if (errors.error(); as e) {
+      <div class="api-error" role="alert">
+        {{ e.message }}
+        @if (e.traceId) { <small>(réf. {{ e.traceId }})</small> }
+        <button type="button" (click)="errors.clear()" aria-label="Fermer">×</button>
+      </div>
+    }
     <main>
       <router-outlet />
     </main>
@@ -25,6 +33,7 @@ import { MeFacade } from './me.facade';
 })
 export class AppComponent implements OnInit {
   private readonly facade = inject(MeFacade);
+  protected readonly errors = inject(ApiErrorStore);
   readonly me = signal<Me | null>(null);
 
   ngOnInit(): void {
