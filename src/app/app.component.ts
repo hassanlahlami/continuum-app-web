@@ -1,28 +1,26 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 import { Me } from '../../libs/api-clients/me';
 import { MeFacade } from './me.facade';
 
 /**
- * Coquille applicative minimale (§1.2) : affiche l'utilisateur courant obtenu via le client généré.
- * Les libellés/valeurs visuelles définitives viendront des tokens `--ct-*` et de l'i18n (§1.6).
+ * Coquille applicative (§1.2) : en-tête (utilisateur courant, entité) + zone de contenu routée.
+ * Valeurs visuelles définitives via tokens `--ct-*` et i18n (§1.6).
  */
 @Component({
   selector: 'ct-root',
   standalone: true,
+  imports: [RouterOutlet],
   template: `
-    @if (me(); as user) {
-      <header>
+    <header>
+      @if (me(); as user) {
         <strong>{{ user.user.displayName }}</strong>
-        <span>{{ user.entity.label }}</span>
-      </header>
-      <ul>
-        @for (a of user.assignments; track a.positionLabel) {
-          <li>{{ a.positionLabel }}</li>
-        }
-      </ul>
-    } @else {
-      <p>Chargement…</p>
-    }
+        <span>· {{ user.entity.label }}</span>
+      }
+    </header>
+    <main>
+      <router-outlet />
+    </main>
   `,
 })
 export class AppComponent implements OnInit {
