@@ -4,8 +4,8 @@ import { MissionPage } from '../../../libs/api-clients/missions';
 import { MissionsFacade } from '../missions.facade';
 
 /**
- * Liste des missions (archétype LISTE, §8) : missions du périmètre, pagination **côté serveur**
- * (`page`/`size`). Tri et filtres serveur à brancher ; reflet dans l'URL à suivre.
+ * Liste des missions (archétype LISTE, §8) : recherche + pagination **côté serveur**, reflétées dans
+ * l'URL (`?q=&page=`, partageable). Le serveur filtre selon le périmètre (feature `mission.read`).
  */
 @Component({
   selector: 'ct-missions',
@@ -14,6 +14,10 @@ import { MissionsFacade } from '../missions.facade';
   template: `
     <section>
       <h1>Missions</h1>
+      <form class="filters" (submit)="$event.preventDefault(); search(searchInput.value)">
+        <input #searchInput type="search" name="q" [value]="query()" placeholder="Rechercher…" aria-label="Rechercher" />
+        <button type="submit">Rechercher</button>
+      </form>
       @if (page(); as p) {
         @if (p.items.length) {
           <table>
@@ -37,7 +41,7 @@ import { MissionsFacade } from '../missions.facade';
             <button type="button" (click)="go(p.page + 1)" [disabled]="p.page + 1 >= p.totalPages">Suivant</button>
           </nav>
         } @else {
-          <p>Aucune mission — créer un plan d'audit.</p>
+          <p>Aucune mission pour ces critères.</p>
         }
       } @else {
         <p>Chargement…</p>
@@ -50,12 +54,14 @@ export class MissionsPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   readonly page = signal<MissionPage | null>(null);
+  readonly query = signal<string>('');
 
   ngOnInit(): void {
-    // La page courante est portée par l'URL (partageable) : on réagit à `?page=`.
     this.route.queryParamMap.subscribe((params) => {
       const index = Math.max(0, Number(params.get('page') ?? 0) || 0);
-      this.facade.list(index).subscribe((p) => this.page.set(p));
+      const q = params.get('q') ?? '';
+      this.query.set(q);
+      this.facade.list(index, 20, q || undefined).subscribe((p) => this.page.set(p));
     });
   }
 
@@ -63,6 +69,14 @@ export class MissionsPage implements OnInit {
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { page: index },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  search(value: string): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { q: value || null, page: 0 },
       queryParamsHandling: 'merge',
     });
   }
