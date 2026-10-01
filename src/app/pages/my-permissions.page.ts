@@ -1,11 +1,9 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { Permissions } from '../../../libs/api-clients/me';
-import { MeFacade } from '../me.facade';
+import { Component, OnInit, inject } from '@angular/core';
+import { PermissionsStore } from '../permissions.store';
 
 /**
  * Page « Mes droits » (archétype proche de TABLEAU DE BORD, §1.5/§8) : liste les fonctionnalités
- * effectives et leurs portées, telles que renvoyées par le serveur (`/me/permissions`, §2.1.7).
- * Le front n'applique aucune règle de sécurité : il affiche ce que le serveur accorde (D32).
+ * effectives et leurs portées (`/me/permissions`, §2.1.7), via {@link PermissionsStore}.
  */
 @Component({
   selector: 'ct-my-permissions',
@@ -13,7 +11,7 @@ import { MeFacade } from '../me.facade';
   template: `
     <section>
       <h1>Mes droits</h1>
-      @if (permissions(); as p) {
+      @if (store.permissions(); as p) {
         <p>Version d'habilitation : {{ p.authzVersion }}</p>
         <ul>
           @for (feature of p.features; track feature.code) {
@@ -34,10 +32,9 @@ import { MeFacade } from '../me.facade';
   `,
 })
 export class MyPermissionsPage implements OnInit {
-  private readonly facade = inject(MeFacade);
-  readonly permissions = signal<Permissions | null>(null);
+  protected readonly store = inject(PermissionsStore);
 
   ngOnInit(): void {
-    this.facade.permissions().subscribe((p) => this.permissions.set(p));
+    this.store.ensureLoaded().subscribe();
   }
 }
