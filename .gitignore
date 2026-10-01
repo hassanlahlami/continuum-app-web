@@ -15,6 +15,7 @@ tmp/
 
 # --- Clients API générés depuis les contrats (D32) : régénérés, non commités ---
 libs/api-clients/*/
+libs/.contracts/
 .openapi-generator-cli/
 dist-test/
 
