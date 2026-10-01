@@ -1,4 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { HasFeatureDirective } from '../directives/has-feature.directive';
 import { PermissionsStore } from '../permissions.store';
 
 /**
@@ -8,9 +10,11 @@ import { PermissionsStore } from '../permissions.store';
 @Component({
   selector: 'ct-my-permissions',
   standalone: true,
+  imports: [RouterLink, HasFeatureDirective],
   template: `
     <section>
       <h1>Mes droits</h1>
+      <a routerLink="/missions" *hasFeature="'mission.read'">Voir les missions</a>
       @if (store.permissions(); as p) {
         <p>Version d'habilitation : {{ p.authzVersion }}</p>
         <ul>
