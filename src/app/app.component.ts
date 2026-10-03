@@ -13,10 +13,14 @@ import { MeFacade } from './me.facade';
   standalone: true,
   imports: [RouterOutlet],
   template: `
-    <header>
+    <header class="app-bar">
+      <div class="brand">Continuum</div>
+      <div class="spacer"></div>
       @if (me(); as user) {
-        <strong>{{ user.user.displayName }}</strong>
-        <span>· {{ user.entity.label }}</span>
+        <div class="user">
+          <strong>{{ user.user.displayName }}</strong>
+          <span>{{ user.entity.label }}</span>
+        </div>
       }
     </header>
     @if (errors.error(); as e) {

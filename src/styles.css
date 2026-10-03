@@ -1,0 +1,302 @@
+/*
+ * Thème de dév — architecture de tokens à 3 niveaux (§1.6 : primitifs → sémantiques → composants).
+ * Les composants ne portent AUCUNE valeur visuelle en dur : seul ce fichier (et, à terme, la feuille
+ * servie par GET /api/public/theme) définit l'apparence. Valeurs provisoires de dév (le thème
+ * définitif est une donnée du tenant, livrée par le pack et appliquée à l'exécution).
+ */
+
+:root {
+  /* — Primitifs — */
+  --ct-blue-50: #eef4ff;
+  --ct-blue-100: #dbe6ff;
+  --ct-blue-600: #1f6feb;
+  --ct-blue-700: #1a5fd0;
+  --ct-slate-50: #f6f8fa;
+  --ct-slate-100: #eef2f6;
+  --ct-slate-200: #e3e9ef;
+  --ct-slate-300: #d2dbe4;
+  --ct-slate-500: #6b7a8d;
+  --ct-slate-700: #37424f;
+  --ct-slate-900: #16202b;
+  --ct-green-50: #e9f7ef;
+  --ct-green-600: #1f8f52;
+  --ct-amber-50: #fdf3e3;
+  --ct-amber-700: #9a6700;
+  --ct-red-50: #fdecea;
+  --ct-red-700: #a1281c;
+
+  /* — Sémantiques — */
+  --ct-color-bg: var(--ct-slate-50);
+  --ct-color-surface: #ffffff;
+  --ct-color-surface-alt: var(--ct-slate-100);
+  --ct-color-text: var(--ct-slate-900);
+  --ct-color-muted: var(--ct-slate-500);
+  --ct-color-border: var(--ct-slate-200);
+  --ct-color-primary: var(--ct-blue-600);
+  --ct-color-primary-hover: var(--ct-blue-700);
+  --ct-color-primary-contrast: #ffffff;
+  --ct-color-primary-soft: var(--ct-blue-50);
+
+  --ct-font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --ct-font-heading: var(--ct-font-body);
+  --ct-font-mono: ui-monospace, "SFMono-Regular", "Cascadia Code", Consolas, monospace;
+
+  --ct-space-1: 4px;
+  --ct-space-2: 8px;
+  --ct-space-3: 12px;
+  --ct-space-4: 16px;
+  --ct-space-5: 24px;
+  --ct-space-6: 32px;
+
+  --ct-radius-sm: 6px;
+  --ct-radius-md: 10px;
+  --ct-radius-lg: 14px;
+  --ct-radius-pill: 999px;
+  --ct-shadow-sm: 0 1px 2px rgba(16, 32, 48, 0.06), 0 1px 3px rgba(16, 32, 48, 0.08);
+  --ct-shadow-md: 0 2px 8px rgba(16, 32, 48, 0.08), 0 8px 24px rgba(16, 32, 48, 0.06);
+
+  /* — Composants — */
+  --ct-appbar-height: 56px;
+  --ct-button-radius: var(--ct-radius-sm);
+  --ct-card-radius: var(--ct-radius-lg);
+  --ct-card-elevation: var(--ct-shadow-sm);
+  --ct-table-row-height: 44px;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--ct-font-body);
+  color: var(--ct-color-text);
+  background:
+    radial-gradient(1200px 400px at 100% -5%, var(--ct-color-primary-soft), transparent 60%),
+    var(--ct-color-bg);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ———————————————————————————— Barre d'application ———————————————————————————— */
+.app-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: var(--ct-space-3);
+  height: var(--ct-appbar-height);
+  padding: 0 var(--ct-space-5);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: saturate(1.2) blur(8px);
+  border-bottom: 1px solid var(--ct-color-border);
+}
+.app-bar .brand {
+  display: flex;
+  align-items: center;
+  gap: var(--ct-space-2);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+  color: var(--ct-color-text);
+}
+.app-bar .brand::before {
+  content: "";
+  width: 22px;
+  height: 22px;
+  border-radius: var(--ct-radius-sm);
+  background: linear-gradient(135deg, var(--ct-color-primary), #5aa0ff);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+.app-bar .spacer { flex: 1; }
+.app-bar .user {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.2;
+}
+.app-bar .user strong { font-size: 0.9rem; }
+.app-bar .user span { color: var(--ct-color-muted); font-size: 0.78rem; }
+
+/* ———————————————————————————— Contenu ———————————————————————————— */
+main {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: var(--ct-space-6) var(--ct-space-5);
+}
+
+section {
+  background: var(--ct-color-surface);
+  border: 1px solid var(--ct-color-border);
+  border-radius: var(--ct-card-radius);
+  box-shadow: var(--ct-card-elevation);
+  padding: var(--ct-space-5) var(--ct-space-6);
+}
+
+h1 {
+  margin: 0 0 var(--ct-space-4);
+  font-family: var(--ct-font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+h2 { margin: 0 0 var(--ct-space-3); font-size: 1.15rem; }
+
+p { margin: var(--ct-space-3) 0; }
+
+a { color: var(--ct-color-primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+code {
+  font-family: var(--ct-font-mono);
+  font-size: 0.82em;
+  background: var(--ct-color-surface-alt);
+  color: var(--ct-slate-700);
+  padding: 2px 6px;
+  border-radius: var(--ct-radius-sm);
+  border: 1px solid var(--ct-color-border);
+}
+
+/* Navigation en pastilles (page d'accueil) */
+section > nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ct-space-2);
+  margin-bottom: var(--ct-space-4);
+}
+section > nav a {
+  padding: 6px 14px;
+  border-radius: var(--ct-radius-pill);
+  background: var(--ct-color-primary-soft);
+  color: var(--ct-color-primary);
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+section > nav a:hover { background: var(--ct-blue-100); text-decoration: none; }
+
+/* Liste « Mes droits » en cartes */
+section > ul {
+  list-style: none;
+  margin: var(--ct-space-4) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--ct-space-3);
+}
+section > ul > li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ct-space-2);
+  padding: var(--ct-space-3) var(--ct-space-4);
+  background: var(--ct-color-surface);
+  border: 1px solid var(--ct-color-border);
+  border-radius: var(--ct-radius-md);
+  box-shadow: var(--ct-shadow-sm);
+}
+.scope {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: var(--ct-radius-pill);
+  background: var(--ct-green-50);
+  color: var(--ct-green-600);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+/* ———————————————————————————— Formulaire de recherche ———————————————————————————— */
+.filters {
+  display: flex;
+  gap: var(--ct-space-2);
+  margin-bottom: var(--ct-space-4);
+}
+.filters input[type="search"] {
+  flex: 1;
+  max-width: 360px;
+  padding: 9px 12px;
+  font: inherit;
+  border: 1px solid var(--ct-color-border);
+  border-radius: var(--ct-button-radius);
+  background: var(--ct-color-surface);
+}
+.filters input[type="search"]:focus {
+  outline: none;
+  border-color: var(--ct-color-primary);
+  box-shadow: 0 0 0 3px var(--ct-color-primary-soft);
+}
+
+/* ———————————————————————————— Boutons ———————————————————————————— */
+button {
+  font: inherit;
+  font-weight: 600;
+  padding: 9px 16px;
+  border: 1px solid var(--ct-color-border);
+  border-radius: var(--ct-button-radius);
+  background: var(--ct-color-surface);
+  color: var(--ct-color-text);
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+button:hover:not(:disabled) { background: var(--ct-color-surface-alt); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+button[type="submit"] {
+  background: var(--ct-color-primary);
+  border-color: var(--ct-color-primary);
+  color: var(--ct-color-primary-contrast);
+}
+button[type="submit"]:hover:not(:disabled) { background: var(--ct-color-primary-hover); }
+
+/* ———————————————————————————— Tableau ———————————————————————————— */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--ct-color-surface);
+  border: 1px solid var(--ct-color-border);
+  border-radius: var(--ct-radius-md);
+  overflow: hidden;
+}
+th, td {
+  text-align: left;
+  padding: 0 var(--ct-space-4);
+  height: var(--ct-table-row-height);
+  border-bottom: 1px solid var(--ct-color-border);
+}
+thead th {
+  background: var(--ct-color-surface-alt);
+  color: var(--ct-color-muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: var(--ct-color-primary-soft); }
+
+/* Pagination */
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ct-space-3);
+  margin-top: var(--ct-space-4);
+  color: var(--ct-color-muted);
+}
+
+/* ———————————————————————————— Bandeau d'erreur ———————————————————————————— */
+.api-error {
+  display: flex;
+  align-items: center;
+  gap: var(--ct-space-2);
+  margin: var(--ct-space-4) auto 0;
+  max-width: 1040px;
+  padding: var(--ct-space-3) var(--ct-space-4);
+  background: var(--ct-red-50);
+  color: var(--ct-red-700);
+  border: 1px solid #f3c6c0;
+  border-radius: var(--ct-radius-md);
+}
+.api-error button { margin-left: auto; border: none; background: transparent; color: inherit; }

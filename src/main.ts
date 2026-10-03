@@ -14,17 +14,35 @@ import { environment } from './environments/environment';
 /**
  * Amorçage de la Plateforme Fonctionnelle (§4.2, composants standalone) : HTTP + intercepteur de
  * jeton, routage, et client OIDC (configuration + tentative de connexion au démarrage, §4.5).
+ *
+ * <p>Hors production (D32), on démarre d'abord le Service Worker MSW pour servir les contrats sans
+ * backend ni Keycloak ; en production, aucun mock n'est chargé.
  */
-bootstrapApplication(AppComponent, {
-  providers: [
-    provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
-    provideRouter(routes),
-    provideOAuthClient(),
-    { provide: BASE_PATH, useValue: environment.apiBaseUrl },
-    provideAppInitializer(() => {
-      const oauth = inject(OAuthService);
-      oauth.configure(authConfig);
-      return oauth.loadDiscoveryDocumentAndTryLogin();
+async function startMocksInDev(): Promise<void> {
+  if (!environment.production && environment.useMocks) {
+    const { worker } = await import('./mocks/browser');
+    await worker.start({ onUnhandledRequest: 'bypass' });
+  }
+}
+
+startMocksInDev()
+  .then(() =>
+    bootstrapApplication(AppComponent, {
+      providers: [
+        provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
+        provideRouter(routes),
+        provideOAuthClient(),
+        { provide: BASE_PATH, useValue: environment.apiBaseUrl },
+        provideAppInitializer(() => {
+          const oauth = inject(OAuthService);
+          oauth.configure(authConfig);
+          // Mode mocks : on tente seulement de récupérer une session. Mode live : on exige la
+          // connexion (redirection vers Keycloak si pas de jeton valide), §4.5.
+          return environment.useMocks
+            ? oauth.loadDiscoveryDocumentAndTryLogin()
+            : oauth.loadDiscoveryDocumentAndLogin();
+        }),
+      ],
     }),
-  ],
-}).catch((err) => console.error(err));
+  )
+  .catch((err) => console.error(err));
