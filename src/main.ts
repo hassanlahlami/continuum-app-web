@@ -25,7 +25,27 @@ async function startMocksInDev(): Promise<void> {
   }
 }
 
+/**
+ * Charge le thème du tenant (§1.6.3) AVANT la connexion : la page de login est déjà aux couleurs du
+ * client. La feuille servie par {@code GET /api/public/theme} surcharge les tokens --ct-* par défaut
+ * (styles.css). En cas d'indisponibilité, l'apparence par défaut reste valable.
+ */
+async function loadTenantTheme(): Promise<void> {
+  try {
+    const res = await fetch(`/api/public/theme?entity=${encodeURIComponent(environment.tenantCode)}`);
+    if (res.ok) {
+      const style = document.createElement('style');
+      style.id = 'ct-tenant-theme';
+      style.textContent = await res.text();
+      document.head.appendChild(style);
+    }
+  } catch {
+    // thème indisponible : on garde l'apparence par défaut (tokens de styles.css)
+  }
+}
+
 startMocksInDev()
+  .then(loadTenantTheme)
   .then(() =>
     bootstrapApplication(AppComponent, {
       providers: [

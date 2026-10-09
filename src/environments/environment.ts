@@ -11,4 +11,6 @@ export const environment = {
   oidcIssuer: 'http://localhost:8180/realms/banque-demo',
   /** Préfixe de l'API de la Plateforme Fonctionnelle, §4.3.3. */
   apiBaseUrl: '/api/app',
+  /** Code de l'entité pour le thème public (§1.6) ; en production résolu par le nom d'hôte. */
+  tenantCode: 'BANQUE-DEMO',
 };
