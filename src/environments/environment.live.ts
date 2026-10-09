@@ -8,4 +8,5 @@ export const environment = {
   useMocks: false,
   oidcIssuer: 'http://localhost:8180/realms/banque-demo',
   apiBaseUrl: '/api/app',
+  tenantCode: 'BANQUE-DEMO',
 };
