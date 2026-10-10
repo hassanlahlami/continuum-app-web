@@ -15,4 +15,9 @@ export class FindingsFacade {
   listByMission(missionId: string): Observable<Finding[]> {
     return this.api.listMissionFindings(missionId);
   }
+
+  /** Détail (FRAP) d'un constat d'une mission, §6. */
+  get(missionId: string, findingId: string): Observable<Finding> {
+    return this.api.getFinding(missionId, findingId);
+  }
 }

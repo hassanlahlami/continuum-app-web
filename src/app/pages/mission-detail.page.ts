@@ -36,7 +36,7 @@ import { MissionsFacade } from '../missions.facade';
             <tbody>
               @for (f of findings(); track f.id) {
                 <tr>
-                  <td><code>{{ f.reference }}</code></td>
+                  <td><a [routerLink]="['/missions', missionId, 'findings', f.id]"><code>{{ f.reference }}</code></a></td>
                   <td>{{ f.title }}</td>
                   <td>{{ f.criticality?.label ?? '—' }}</td>
                   <td>{{ f.status.label }}</td>
@@ -59,12 +59,13 @@ export class MissionDetailPage implements OnInit {
   private readonly findingsFacade = inject(FindingsFacade);
   readonly mission = signal<Mission | null>(null);
   readonly findings = signal<Finding[]>([]);
+  missionId = '';
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.facade.get(id).subscribe((m) => this.mission.set(m));
-      this.findingsFacade.listByMission(id).subscribe((fs) => this.findings.set(fs));
+    this.missionId = this.route.snapshot.paramMap.get('id') ?? '';
+    if (this.missionId) {
+      this.facade.get(this.missionId).subscribe((m) => this.mission.set(m));
+      this.findingsFacade.listByMission(this.missionId).subscribe((fs) => this.findings.set(fs));
     }
   }
 }
