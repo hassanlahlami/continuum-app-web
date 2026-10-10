@@ -11,6 +11,13 @@ export class FindingsFacade {
     return this.api.searchFindings();
   }
 
+  /** Exceptions issues du contrôle continu (constats de source CCM), §5. */
+  searchCcm(): Observable<FindingPage> {
+    return this.api.searchFindings(
+      undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined,
+      undefined, 'CCM');
+  }
+
   /** Constats d'une mission (périmètre appliqué par le serveur), §6. */
   listByMission(missionId: string): Observable<Finding[]> {
     return this.api.listMissionFindings(missionId);
