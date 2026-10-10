@@ -17,6 +17,7 @@ import { PermissionsStore } from '../permissions.store';
       <nav>
         <a routerLink="/missions" *hasFeature="'mission.read'">Missions</a>
         <a routerLink="/findings" *hasFeature="'finding.read'">Constats</a>
+        <a routerLink="/ccm" *hasFeature="'finding.read'">Exceptions CCM</a>
       </nav>
       @if (store.permissions(); as p) {
         <p>Version d'habilitation : {{ p.authzVersion }}</p>
