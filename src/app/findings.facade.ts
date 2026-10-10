@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { FindingPage, FindingsService } from '../../libs/api-clients/findings';
+import { Finding, FindingPage, FindingsService } from '../../libs/api-clients/findings';
 
 /** Façade du module « constats » : consomme le client généré (D32). */
 @Injectable({ providedIn: 'root' })
@@ -9,5 +9,10 @@ export class FindingsFacade {
 
   search(): Observable<FindingPage> {
     return this.api.searchFindings();
+  }
+
+  /** Constats d'une mission (périmètre appliqué par le serveur), §6. */
+  listByMission(missionId: string): Observable<Finding[]> {
+    return this.api.listMissionFindings(missionId);
   }
 }
