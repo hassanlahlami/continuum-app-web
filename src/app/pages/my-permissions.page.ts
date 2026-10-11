@@ -14,7 +14,7 @@ import { PermissionsStore } from '../permissions.store';
   template: `
     <section>
       <h1>Mes droits</h1>
-      <nav>
+      <nav data-cy="home-nav">
         <a routerLink="/missions" *hasFeature="'mission.read'">Missions</a>
         <a routerLink="/findings" *hasFeature="'finding.read'">Constats</a>
         <a routerLink="/ccm" *hasFeature="'finding.read'">Exceptions CCM</a>
@@ -23,7 +23,7 @@ import { PermissionsStore } from '../permissions.store';
         <p>Version d'habilitation : {{ p.authzVersion }}</p>
         <ul>
           @for (feature of p.features; track feature.code) {
-            <li>
+            <li data-cy="permission-item">
               <code>{{ feature.code }}</code>
               @for (scope of feature.scopes; track scope.type + '/' + scope.id) {
                 <span class="scope">{{ scope.type }}@if (scope.label) { — {{ scope.label }} }</span>
