@@ -39,3 +39,8 @@ Thumbs.db
 
 # --- Mock handler tests (node --test) ---
 .spec-build/
+
+# --- Cypress runtime artefacts ---
+e2e/cypress/screenshots/
+e2e/cypress/videos/
+e2e/cypress/downloads/

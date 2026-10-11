@@ -67,11 +67,25 @@ export const findingsHandlers = [
   ),
 
   // Action décidée par le serveur : seule `validate` est reconnue ; autre code → 422.
+  // Deux constats « sentinelles » exercent les refus métier côté e2e (FND-03) :
+  //   …000000000409 → SoD dynamique (409), …000000000403 → droit insuffisant (403).
   http.post('*/api/app/missions/:missionId/findings/:findingId/actions/:actionCode', ({ params }) => {
     const missionId = String(params['missionId']);
     const findingId = String(params['findingId']);
     if (params['actionCode'] !== 'validate') {
       return HttpResponse.json({ title: 'Action non supportée' }, { status: 422 });
+    }
+    if (findingId.endsWith('000000000409')) {
+      return HttpResponse.json(
+        { title: 'Conflit SoD', detail: "Validation refusée : conflit SoD dynamique (§2.2) — l'auteur ne peut pas valider." },
+        { status: 409, headers: { 'content-type': 'application/problem+json' } },
+      );
+    }
+    if (findingId.endsWith('000000000403')) {
+      return HttpResponse.json(
+        { title: 'Droit insuffisant', detail: 'finding.validate absent sur ce constat.' },
+        { status: 403, headers: { 'content-type': 'application/problem+json' } },
+      );
     }
     return HttpResponse.json(validatedFinding(missionId, findingId));
   }),
