@@ -56,10 +56,11 @@ startMocksInDev()
         provideAppInitializer(() => {
           const oauth = inject(OAuthService);
           oauth.configure(authConfig);
-          // Mode mocks : on tente seulement de récupérer une session. Mode live : on exige la
-          // connexion (redirection vers Keycloak si pas de jeton valide), §4.5.
+          // Mode mocks : best-effort (« sans backend/login », cf. environment). Si Keycloak est absent,
+          // l'échec du document de découverte ne doit pas empêcher l'amorçage — on reste déconnecté.
+          // Mode live : on exige la connexion (redirection vers Keycloak si pas de jeton valide), §4.5.
           return environment.useMocks
-            ? oauth.loadDiscoveryDocumentAndTryLogin()
+            ? oauth.loadDiscoveryDocumentAndTryLogin().catch(() => true)
             : oauth.loadDiscoveryDocumentAndLogin();
         }),
       ],
