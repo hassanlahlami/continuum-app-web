@@ -18,7 +18,7 @@ import { MissionsFacade } from '../missions.facade';
       <a routerLink="/missions">← Missions</a>
       @if (mission(); as m) {
         <header>
-          <h1>{{ m.title }}</h1>
+          <h1 data-cy="mission-title">{{ m.title }}</h1>
           <p><code>{{ m.reference }}</code> · {{ m.status.label }} · {{ m.phase.label }}</p>
         </header>
         <dl>
@@ -29,14 +29,14 @@ import { MissionsFacade } from '../missions.facade';
 
         <h2>Constats</h2>
         @if (findings().length) {
-          <table>
+          <table data-cy="mission-findings">
             <thead>
               <tr><th>Référence</th><th>Titre</th><th>Criticité</th><th>Statut</th></tr>
             </thead>
             <tbody>
               @for (f of findings(); track f.id) {
-                <tr>
-                  <td><a [routerLink]="['/missions', missionId, 'findings', f.id]"><code>{{ f.reference }}</code></a></td>
+                <tr data-cy="finding-row">
+                  <td><a [routerLink]="['/missions', missionId, 'findings', f.id]" data-cy="finding-link"><code>{{ f.reference }}</code></a></td>
                   <td>{{ f.title }}</td>
                   <td>{{ f.criticality?.label ?? '—' }}</td>
                   <td>{{ f.status.label }}</td>
