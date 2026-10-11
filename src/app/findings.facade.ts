@@ -27,4 +27,18 @@ export class FindingsFacade {
   get(missionId: string, findingId: string): Observable<Finding> {
     return this.api.getFinding(missionId, findingId);
   }
+
+  /**
+   * Exécute une action décidée par le serveur sur un constat (§2.1.4) — ex. {@code validate}. Le code
+   * et la disponibilité viennent de {@code availableActions} ; le front n'invente aucune règle (D32).
+   */
+  performAction(
+    missionId: string,
+    findingId: string,
+    actionCode: string,
+    version: number,
+    comment?: string,
+  ): Observable<Finding> {
+    return this.api.performFindingAction(missionId, findingId, actionCode, { version, comment });
+  }
 }
