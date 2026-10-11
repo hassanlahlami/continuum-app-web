@@ -14,13 +14,13 @@ import { FindingsFacade } from '../findings.facade';
       <h1>Constats</h1>
       @if (page(); as p) {
         @if (p.items.length) {
-          <table>
+          <table data-cy="findings-table">
             <thead>
               <tr><th>Référence</th><th>Titre</th><th>Criticité</th><th>Statut</th><th>Mission</th></tr>
             </thead>
             <tbody>
               @for (finding of p.items; track finding.id) {
-                <tr>
+                <tr data-cy="finding-row">
                   <td><code>{{ finding.reference }}</code></td>
                   <td>{{ finding.title }}</td>
                   <td>{{ finding.criticality?.label ?? '—' }}</td>

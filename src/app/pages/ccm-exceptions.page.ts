@@ -16,13 +16,13 @@ import { FindingsFacade } from '../findings.facade';
       <p>Constats générés automatiquement par le contrôle continu (§5).</p>
       @if (page(); as p) {
         @if (p.items.length) {
-          <table>
+          <table data-cy="ccm-exceptions-table">
             <thead>
               <tr><th>Référence</th><th>Titre</th><th>Criticité</th><th>Statut</th></tr>
             </thead>
             <tbody>
               @for (finding of p.items; track finding.id) {
-                <tr>
+                <tr data-cy="ccm-row">
                   <td><code>{{ finding.reference }}</code></td>
                   <td>{{ finding.title }}</td>
                   <td>{{ finding.criticality?.label ?? '—' }}</td>
