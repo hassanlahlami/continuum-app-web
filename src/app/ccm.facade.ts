@@ -2,6 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
   ActionRequest,
+  CcmControl,
+  CcmControlsService,
   CcmException,
   CcmExceptionPage,
   CcmExceptionsService,
@@ -9,12 +11,23 @@ import {
 } from '../../libs/api-clients/ccm';
 
 /**
- * Façade du module « exceptions CCM » (§5.3, D34) : consomme le client généré (D32). Le front n'invente
+ * Façade des modules CCM (§5, §5.3, D34) : consomme les clients générés (D32). Le front n'invente
  * aucune règle — le périmètre, le statut et les actions ({@code availableActions}) viennent du serveur.
  */
 @Injectable({ providedIn: 'root' })
 export class CcmFacade {
   private readonly api = inject(CcmExceptionsService);
+  private readonly controls = inject(CcmControlsService);
+
+  /** Bibliothèque de contrôles (§5), filtrable ; le périmètre ({@code ccm.read}) est appliqué par le serveur. */
+  listControls(q?: string, category?: CcmControl.CategoryEnum, active?: boolean): Observable<CcmControl[]> {
+    return this.controls.listCcmControls(q, category, active);
+  }
+
+  /** Fiche d'un contrôle (règle, paramètres métier, planification, référence normative). */
+  getControl(controlId: string): Observable<CcmControl> {
+    return this.controls.getCcmControl(controlId);
+  }
 
   /** Flux d'exceptions à trier (filtrable par statut), périmètre appliqué par le serveur. */
   listExceptions(status?: string[]): Observable<CcmExceptionPage> {

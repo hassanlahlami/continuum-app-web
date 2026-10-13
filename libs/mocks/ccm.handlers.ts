@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import type { ActionRequest, CcmException, CcmExceptionPage } from '../api-clients/ccm';
+import type { ActionRequest, CcmControl, CcmException, CcmExceptionPage } from '../api-clients/ccm';
 
 /**
  * Mocks MSW du flux d'exceptions CCM (§5.3, D34, front-first) — fixtures typées par le client généré.
@@ -45,7 +45,99 @@ export const ccmExceptionPageFixture: CcmExceptionPage = {
   items: [exceptionFor(NEW_ID), exceptionFor(RETAINED_ID)],
 };
 
+/**
+ * Fixtures de la bibliothèque de contrôles (§5) — les 3 contrôles MVP du pack Banque. Valeurs par défaut
+ * issues du pack (`docs/pack-banque/CONTROLES-CCM.md`), non codées en dur côté noyau. SOD-VIREMENTS et
+ * SEUIL-HORAIRE sont activés ; COMPTES-DORMANTS est désactivé (pour exercer le filtre `active`).
+ */
+export const ccmControlsFixture: CcmControl[] = [
+  {
+    id: 'cc100000-0000-0000-0000-000000000001',
+    code: 'SOD-VIREMENTS',
+    label: 'Séparation des tâches — virements',
+    category: 'ACCESS',
+    description: 'Même utilisateur saisissant et validant un virement (cumul interdit, §2.2).',
+    normativeReference: 'COSO — Control Activities (SoD)',
+    dataset: 'ACCESS',
+    active: true,
+    health: 'NEVER_RUN',
+    parameterDefinitions: [
+      { name: 'makerFunction', label: 'Fonction de saisie', type: 'STRING' },
+      { name: 'checkerFunction', label: 'Fonction de validation', type: 'STRING' },
+    ],
+    settings: {
+      version: 1,
+      parameters: { makerFunction: 'SAISIE_VIREMENT', checkerFunction: 'VALIDATION_VIREMENT' },
+      schedule: { mode: 'ON_EVENT' },
+    },
+  },
+  {
+    id: 'cc100000-0000-0000-0000-000000000002',
+    code: 'SEUIL-HORAIRE',
+    label: 'Écritures hors seuil / hors heures',
+    category: 'TRANSACTIONS',
+    description: 'Écritures au-dessus du seuil ou en dehors des jours ouvrés.',
+    normativeReference: 'BCBS 239 — exhaustivité et exactitude',
+    dataset: 'TRANSACTIONS',
+    active: true,
+    health: 'OK',
+    exceptionRate: 0.012,
+    lastRunAt: '2026-09-12T06:00:00Z',
+    parameterDefinitions: [
+      { name: 'thresholdAmount', label: 'Seuil de montant', type: 'MONEY' },
+      { name: 'maxBackValueDays', label: 'Jours d\'antériorité max', type: 'NUMBER' },
+    ],
+    settings: {
+      version: 3,
+      parameters: { thresholdAmount: 1000000, maxBackValueDays: 2, nonWorkingDays: ['SAT', 'SUN'] },
+      schedule: { mode: 'CRON', cron: '0 0 6 * * *' },
+    },
+  },
+  {
+    id: 'cc100000-0000-0000-0000-000000000003',
+    code: 'COMPTES-DORMANTS',
+    label: 'Comptes dormants réactivés',
+    category: 'MASTER_DATA',
+    description: 'Mouvements sur des comptes inactifs depuis plusieurs mois.',
+    normativeReference: 'Bâle — risque opérationnel',
+    dataset: 'MASTER_DATA',
+    active: false,
+    health: 'NEVER_RUN',
+    parameterDefinitions: [
+      { name: 'dormancyMonths', label: 'Mois d\'inactivité', type: 'NUMBER' },
+      { name: 'minAmount', label: 'Montant minimum', type: 'MONEY' },
+    ],
+    settings: {
+      version: 1,
+      parameters: { dormancyMonths: 12, minAmount: 10000 },
+    },
+  },
+];
+
 export const ccmHandlers = [
+  // Bibliothèque de contrôles (§5) — filtrable par recherche libre, catégorie et activation.
+  http.get('*/api/app/ccm/controls', ({ request }) => {
+    const url = new URL(request.url);
+    const q = url.searchParams.get('q')?.toLowerCase();
+    const category = url.searchParams.get('category');
+    const active = url.searchParams.get('active');
+    const list = ccmControlsFixture.filter((c) => {
+      if (q && !(c.label.toLowerCase().includes(q) || c.code.toLowerCase().includes(q))) return false;
+      if (category && c.category !== category) return false;
+      if (active != null && active !== '' && c.active !== (active === 'true')) return false;
+      return true;
+    });
+    return HttpResponse.json(list);
+  }),
+
+  // Fiche d'un contrôle.
+  http.get('*/api/app/ccm/controls/:controlId', ({ params }) => {
+    const control = ccmControlsFixture.find((c) => c.id === String(params['controlId']));
+    return control
+      ? HttpResponse.json(control)
+      : HttpResponse.json({ title: 'Contrôle introuvable' }, { status: 404 });
+  }),
+
   // Flux d'exceptions à trier.
   http.get('*/api/app/ccm/exceptions', () => HttpResponse.json(ccmExceptionPageFixture)),
 
