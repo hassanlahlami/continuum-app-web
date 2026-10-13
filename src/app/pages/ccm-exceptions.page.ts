@@ -1,38 +1,40 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { FindingPage } from '../../../libs/api-clients/findings';
-import { FindingsFacade } from '../findings.facade';
+import { RouterLink } from '@angular/router';
+import { CcmExceptionPage } from '../../../libs/api-clients/ccm';
+import { CcmFacade } from '../ccm.facade';
 
 /**
- * Exceptions du contrôle continu (CCM, §5) : les constats générés automatiquement (source {@code CCM})
- * — cumuls SoD, anomalies détectées. Le serveur filtre (source=CCM) et applique le périmètre ; le
- * front affiche (D32).
+ * Flux d'exceptions du contrôle continu (CCM, §5.3, D34) : le moteur produit des <strong>exceptions</strong>
+ * à trier (jamais des constats). Le serveur applique le périmètre ({@code ccm.read}) et renvoie les
+ * exceptions ; le front affiche et renvoie vers le détail pour le triage (D32).
  */
 @Component({
   selector: 'ct-ccm-exceptions',
   standalone: true,
+  imports: [RouterLink],
   template: `
     <section>
       <h1>Exceptions CCM</h1>
-      <p>Constats générés automatiquement par le contrôle continu (§5).</p>
+      <p>Exceptions détectées par le contrôle continu (§5.3), à trier par un auditeur habilité.</p>
       @if (page(); as p) {
         @if (p.items.length) {
           <table data-cy="ccm-exceptions-table">
             <thead>
-              <tr><th>Référence</th><th>Titre</th><th>Criticité</th><th>Statut</th></tr>
+              <tr><th>Contrôle</th><th>Résumé</th><th>Criticité</th><th>Statut</th></tr>
             </thead>
             <tbody>
-              @for (finding of p.items; track finding.id) {
+              @for (exc of p.items; track exc.id) {
                 <tr data-cy="ccm-row">
-                  <td><code>{{ finding.reference }}</code></td>
-                  <td>{{ finding.title }}</td>
-                  <td>{{ finding.criticality?.label ?? '—' }}</td>
-                  <td>{{ finding.status.label }}</td>
+                  <td><code>{{ exc.controlCode }}</code></td>
+                  <td><a [routerLink]="['/ccm/exceptions', exc.id]" data-cy="ccm-exc-link">{{ exc.summary || '—' }}</a></td>
+                  <td>{{ exc.criticality?.label ?? '—' }}</td>
+                  <td data-cy="ccm-exc-status">{{ exc.status.label }}</td>
                 </tr>
               }
             </tbody>
           </table>
         } @else {
-          <p>Aucune exception CCM.</p>
+          <p data-cy="ccm-empty">Aucune exception à trier.</p>
         }
       } @else {
         <p>Chargement…</p>
@@ -41,10 +43,10 @@ import { FindingsFacade } from '../findings.facade';
   `,
 })
 export class CcmExceptionsPage implements OnInit {
-  private readonly facade = inject(FindingsFacade);
-  readonly page = signal<FindingPage | null>(null);
+  private readonly facade = inject(CcmFacade);
+  readonly page = signal<CcmExceptionPage | null>(null);
 
   ngOnInit(): void {
-    this.facade.searchCcm().subscribe((p) => this.page.set(p));
+    this.facade.listExceptions().subscribe((p) => this.page.set(p));
   }
 }
