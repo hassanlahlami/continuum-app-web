@@ -15,7 +15,10 @@ import { CcmFacade } from '../ccm.facade';
   template: `
     <section>
       <h1>Exceptions CCM</h1>
-      <p>Exceptions détectées par le contrôle continu (§5.3), à trier par un auditeur habilité.</p>
+      <p>
+        Exceptions détectées par le contrôle continu (§5.3), à trier par un auditeur habilité.
+        <a routerLink="/ccm/controls" data-cy="ccm-controls-link">Bibliothèque de contrôles →</a>
+      </p>
       @if (page(); as p) {
         @if (p.items.length) {
           <table data-cy="ccm-exceptions-table">
