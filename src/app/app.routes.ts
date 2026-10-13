@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { requireFeature } from './guards/require-feature.guard';
+import { CcmExceptionDetailPage } from './pages/ccm-exception-detail.page';
 import { CcmExceptionsPage } from './pages/ccm-exceptions.page';
 import { FindingDetailPage } from './pages/finding-detail.page';
 import { FindingsPage } from './pages/findings.page';
@@ -18,5 +19,10 @@ export const routes: Routes = [
     component: FindingDetailPage,
   },
   { path: 'findings', canMatch: [requireFeature('finding.read')], component: FindingsPage },
-  { path: 'ccm', canMatch: [requireFeature('finding.read')], component: CcmExceptionsPage },
+  { path: 'ccm', canMatch: [requireFeature('ccm.read')], component: CcmExceptionsPage },
+  {
+    path: 'ccm/exceptions/:exceptionId',
+    canMatch: [requireFeature('ccm.read')],
+    component: CcmExceptionDetailPage,
+  },
 ];
