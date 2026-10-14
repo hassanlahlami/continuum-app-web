@@ -7,6 +7,8 @@ import {
   CcmException,
   CcmExceptionPage,
   CcmExceptionsService,
+  CcmOverview,
+  CcmOverviewService,
   ConvertCcmExceptionToFinding201Response,
 } from '../../libs/api-clients/ccm';
 
@@ -18,6 +20,12 @@ import {
 export class CcmFacade {
   private readonly api = inject(CcmExceptionsService);
   private readonly controls = inject(CcmControlsService);
+  private readonly overview = inject(CcmOverviewService);
+
+  /** Vue d'ensemble du cockpit (§5) : santé des contrôles, exceptions ouvertes/à trier, tendance. */
+  getOverview(): Observable<CcmOverview> {
+    return this.overview.getCcmOverview();
+  }
 
   /** Bibliothèque de contrôles (§5), filtrable ; le périmètre ({@code ccm.read}) est appliqué par le serveur. */
   listControls(q?: string, category?: CcmControl.CategoryEnum, active?: boolean): Observable<CcmControl[]> {
