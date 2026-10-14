@@ -4,6 +4,7 @@ import { CcmControlDetailPage } from './pages/ccm-control-detail.page';
 import { CcmControlsPage } from './pages/ccm-controls.page';
 import { CcmExceptionDetailPage } from './pages/ccm-exception-detail.page';
 import { CcmExceptionsPage } from './pages/ccm-exceptions.page';
+import { CcmOverviewPage } from './pages/ccm-overview.page';
 import { FindingDetailPage } from './pages/finding-detail.page';
 import { FindingsPage } from './pages/findings.page';
 import { MissionDetailPage } from './pages/mission-detail.page';
@@ -22,6 +23,7 @@ export const routes: Routes = [
   },
   { path: 'findings', canMatch: [requireFeature('finding.read')], component: FindingsPage },
   { path: 'ccm', canMatch: [requireFeature('ccm.read')], component: CcmExceptionsPage },
+  { path: 'ccm/overview', canMatch: [requireFeature('ccm.read')], component: CcmOverviewPage },
   { path: 'ccm/controls', canMatch: [requireFeature('ccm.read')], component: CcmControlsPage },
   {
     path: 'ccm/controls/:controlId',

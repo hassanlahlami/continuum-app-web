@@ -1,5 +1,11 @@
 import { http, HttpResponse } from 'msw';
-import type { ActionRequest, CcmControl, CcmException, CcmExceptionPage } from '../api-clients/ccm';
+import type {
+  ActionRequest,
+  CcmControl,
+  CcmException,
+  CcmExceptionPage,
+  CcmOverview,
+} from '../api-clients/ccm';
 
 /**
  * Mocks MSW du flux d'exceptions CCM (§5.3, D34, front-first) — fixtures typées par le client généré.
@@ -114,7 +120,25 @@ export const ccmControlsFixture: CcmControl[] = [
   },
 ];
 
+/** Vue d'ensemble du cockpit (§5) : agrégats cohérents avec les fixtures de contrôles et d'exceptions. */
+export const ccmOverviewFixture: CcmOverview = {
+  activeControls: 2,
+  failingControls: 0,
+  driftingControls: 0,
+  openExceptions: 3,
+  exceptionsToTriage: 2,
+  controls: ccmControlsFixture,
+  exceptionTrend: [
+    { date: '2026-09-10', count: 2 },
+    { date: '2026-09-11', count: 2 },
+    { date: '2026-09-12', count: 1 },
+  ],
+};
+
 export const ccmHandlers = [
+  // Vue d'ensemble du cockpit (§5).
+  http.get('*/api/app/ccm/overview', () => HttpResponse.json(ccmOverviewFixture)),
+
   // Bibliothèque de contrôles (§5) — filtrable par recherche libre, catégorie et activation.
   http.get('*/api/app/ccm/controls', ({ request }) => {
     const url = new URL(request.url);
