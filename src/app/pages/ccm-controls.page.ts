@@ -35,7 +35,7 @@ import { CCM_CATEGORY_LABELS, CCM_HEALTH_LABELS } from '../ccm.labels';
         <h1>Bibliothèque de contrôles</h1>
         <a mat-stroked-button routerLink="/ccm" data-cy="ccm-exceptions-link">Flux d'exceptions</a>
       </header>
-      <p class="page-sub">Contrôles du contrôle continu (§5), activés ou non pour l'entité.</p>
+      <p class="page-sub">Contrôles du contrôle continu, activés ou non pour l'entité.</p>
 
       <mat-card appearance="outlined">
         <mat-card-content>

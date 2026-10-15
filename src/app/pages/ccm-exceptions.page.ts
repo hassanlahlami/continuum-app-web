@@ -25,7 +25,7 @@ import { CcmFacade } from '../ccm.facade';
           <a mat-stroked-button routerLink="/ccm/controls" data-cy="ccm-controls-link">Bibliothèque</a>
         </span>
       </header>
-      <p class="page-sub">Exceptions détectées par le contrôle continu (§5.3), à trier par un auditeur habilité.</p>
+      <p class="page-sub">Exceptions détectées par le contrôle continu, à trier par un auditeur habilité.</p>
 
       @if (page(); as p) {
         @if (p.items.length) {

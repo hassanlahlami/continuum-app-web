@@ -1,5 +1,7 @@
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { inject, provideAppInitializer } from '@angular/core';
+import { LOCALE_ID, inject, provideAppInitializer } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
@@ -11,6 +13,9 @@ import { authConfig } from './app/auth/auth.config';
 import { authInterceptor } from './app/auth/auth.interceptor';
 import { errorInterceptor } from './app/errors/error.interceptor';
 import { environment } from './environments/environment';
+
+// Locale française : formatage des dates, nombres, montants et pourcentages (§1.6, i18n).
+registerLocaleData(localeFr);
 
 /**
  * Amorçage de la Plateforme Fonctionnelle (§4.2, composants standalone) : HTTP + intercepteur de
@@ -50,6 +55,7 @@ startMocksInDev()
   .then(() =>
     bootstrapApplication(AppComponent, {
       providers: [
+        { provide: LOCALE_ID, useValue: 'fr' },
         provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
         provideAnimationsAsync(),
         provideRouter(routes),
