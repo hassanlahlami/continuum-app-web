@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { CcmControl, CcmOverview } from '../../../libs/api-clients/ccm';
 import { CcmFacade } from '../ccm.facade';
@@ -16,7 +17,7 @@ import { CCM_HEALTH_LABELS } from '../ccm.labels';
 @Component({
   selector: 'ct-ccm-overview',
   standalone: true,
-  imports: [RouterLink, MatCardModule, MatTableModule, MatChipsModule, MatButtonModule],
+  imports: [RouterLink, MatCardModule, MatTableModule, MatChipsModule, MatButtonModule, MatIconModule],
   template: `
     <section>
       <header class="page-head">
@@ -29,19 +30,26 @@ import { CCM_HEALTH_LABELS } from '../ccm.labels';
 
       @if (overview(); as o) {
         <div class="kpis" data-cy="ccm-kpis">
-          <mat-card appearance="outlined" class="kpi" data-cy="kpi-exceptions-to-triage">
+          <mat-card appearance="outlined" class="kpi" data-cy="kpi-exceptions-to-triage" routerLink="/ccm">
+            <mat-icon class="kpi-ic">rule</mat-icon>
             <strong>{{ o.exceptionsToTriage ?? 0 }}</strong><span>À trier</span>
           </mat-card>
-          <mat-card appearance="outlined" class="kpi" data-cy="kpi-open-exceptions">
+          <mat-card appearance="outlined" class="kpi" data-cy="kpi-open-exceptions" routerLink="/ccm">
+            <mat-icon class="kpi-ic">pending_actions</mat-icon>
             <strong>{{ o.openExceptions ?? 0 }}</strong><span>Exceptions ouvertes</span>
           </mat-card>
-          <mat-card appearance="outlined" class="kpi" data-cy="kpi-active-controls">
+          <mat-card appearance="outlined" class="kpi" data-cy="kpi-active-controls" routerLink="/ccm/controls">
+            <mat-icon class="kpi-ic">checklist</mat-icon>
             <strong>{{ o.activeControls ?? 0 }}</strong><span>Contrôles actifs</span>
           </mat-card>
-          <mat-card appearance="outlined" class="kpi" data-cy="kpi-failing-controls" [class.alert]="(o.failingControls ?? 0) > 0">
+          <mat-card appearance="outlined" class="kpi" data-cy="kpi-failing-controls" routerLink="/ccm/controls"
+             [class.alert]="(o.failingControls ?? 0) > 0">
+            <mat-icon class="kpi-ic">error</mat-icon>
             <strong>{{ o.failingControls ?? 0 }}</strong><span>En échec</span>
           </mat-card>
-          <mat-card appearance="outlined" class="kpi" data-cy="kpi-drifting-controls" [class.alert]="(o.driftingControls ?? 0) > 0">
+          <mat-card appearance="outlined" class="kpi" data-cy="kpi-drifting-controls" routerLink="/ccm/controls"
+             [class.warn]="(o.driftingControls ?? 0) > 0">
+            <mat-icon class="kpi-ic">trending_up</mat-icon>
             <strong>{{ o.driftingControls ?? 0 }}</strong><span>En dérive</span>
           </mat-card>
         </div>
@@ -102,10 +110,13 @@ import { CCM_HEALTH_LABELS } from '../ccm.labels';
       .page-head { display: flex; align-items: center; justify-content: space-between; gap: var(--ct-space-4); flex-wrap: wrap; }
       .head-actions { display: flex; gap: var(--ct-space-2); }
       .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--ct-space-3); margin-bottom: var(--ct-space-4); }
-      .kpi { text-align: center; padding: var(--ct-space-4); }
+      .kpi { text-align: center; padding: var(--ct-space-4); text-decoration: none; cursor: pointer; transition: box-shadow .15s, border-color .15s, transform .15s; }
+      .kpi:hover { box-shadow: var(--ct-shadow-md); border-color: var(--ct-color-primary); transform: translateY(-1px); }
+      .kpi-ic { color: var(--ct-color-muted); margin-bottom: var(--ct-space-1); }
       .kpi strong { display: block; font-size: 2rem; font-weight: 700; color: var(--ct-color-primary); line-height: 1.1; }
       .kpi span { color: var(--ct-color-muted); font-size: .82rem; }
-      .kpi.alert strong { color: var(--ct-red-700); }
+      .kpi.alert strong, .kpi.alert .kpi-ic { color: var(--ct-red-700); }
+      .kpi.warn strong, .kpi.warn .kpi-ic { color: var(--ct-amber-700); }
       .block { margin-bottom: var(--ct-space-4); }
       table[mat-table] { width: 100%; background: transparent; }
       .trend { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--ct-space-2); }
