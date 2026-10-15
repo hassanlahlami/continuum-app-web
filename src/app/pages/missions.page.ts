@@ -5,6 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MissionPage } from '../../../libs/api-clients/missions';
 import { MissionsFacade } from '../missions.facade';
@@ -17,7 +18,7 @@ import { MissionsFacade } from '../missions.facade';
 @Component({
   selector: 'ct-missions',
   standalone: true,
-  imports: [RouterLink, MatCardModule, MatTableModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule],
+  imports: [RouterLink, MatCardModule, MatTableModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatProgressBarModule],
   template: `
     <section>
       <h1>Missions</h1>
@@ -56,8 +57,9 @@ import { MissionsFacade } from '../missions.facade';
                 <th mat-header-cell *matHeaderCellDef>Avancement</th>
                 <td mat-cell *matCellDef="let m">{{ m.progressPercent ?? 0 }}%</td>
               </ng-container>
-              <tr mat-header-row *matHeaderRowDef="columns"></tr>
-              <tr mat-row *matRowDef="let row; columns: columns" data-cy="mission-row"></tr>
+              <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
+              <tr mat-row *matRowDef="let row; columns: columns" data-cy="mission-row"
+                  class="clickable" (click)="open(row)"></tr>
             </table>
             <nav class="pager">
               <button mat-stroked-button type="button" (click)="go(p.page - 1)" [disabled]="p.page <= 0">Précédent</button>
@@ -69,7 +71,7 @@ import { MissionsFacade } from '../missions.facade';
           <p>Aucune mission pour ces critères.</p>
         }
       } @else {
-        <p>Chargement…</p>
+        <mat-progress-bar mode="indeterminate" aria-label="Chargement"></mat-progress-bar>
       }
     </section>
   `,
@@ -79,6 +81,9 @@ import { MissionsFacade } from '../missions.facade';
       .search { min-width: 280px; }
       .table-card { margin-top: var(--ct-space-4); padding: 0; overflow: hidden; }
       table[mat-table] { width: 100%; background: transparent; }
+      th.mat-mdc-header-cell { background: var(--ct-color-surface); }
+      tr.clickable { cursor: pointer; }
+      tr.clickable:hover { background: var(--ct-color-primary-soft); }
       code { font-family: var(--ct-font-mono); }
       .pager { display: flex; align-items: center; gap: var(--ct-space-3); padding: var(--ct-space-3) var(--ct-space-4); }
       .pager span { color: var(--ct-color-muted); }
@@ -100,6 +105,11 @@ export class MissionsPage implements OnInit {
       this.query.set(q);
       this.facade.list(index, 20, q || undefined).subscribe((p) => this.page.set(p));
     });
+  }
+
+  /** Ouvre la fiche mission (ligne entière cliquable). */
+  open(m: { id: string }): void {
+    this.router.navigate(['/missions', m.id]);
   }
 
   go(index: number): void {
