@@ -5,6 +5,7 @@ import type {
   CcmException,
   CcmExceptionPage,
   CcmOverview,
+  CcmRunPage,
 } from '../api-clients/ccm';
 
 /**
@@ -152,6 +153,44 @@ export const ccmHandlers = [
       return true;
     });
     return HttpResponse.json(list);
+  }),
+
+  // Historique des exécutions d'un contrôle (§5).
+  http.get('*/api/app/ccm/controls/:controlId/runs', ({ params }) => {
+    const controlId = String(params['controlId']);
+    const runs: CcmRunPage = {
+      page: 0,
+      size: 10,
+      totalItems: 2,
+      totalPages: 1,
+      items: [
+        {
+          id: 'run00000-0000-0000-0000-000000000002',
+          controlId,
+          controlLabel: 'Écritures hors seuil / hors heures',
+          status: 'SUCCEEDED',
+          trigger: 'SCHEDULE',
+          startedAt: '2026-09-12T06:00:00Z',
+          finishedAt: '2026-09-12T06:00:12Z',
+          populationSize: 1200,
+          exceptionsCount: 2,
+          dataSource: 'amplitude-sim (JDBC, vues V_AUDIT_*)',
+          parametersUsed: { thresholdAmount: 1000000 },
+        },
+        {
+          id: 'run00000-0000-0000-0000-000000000001',
+          controlId,
+          controlLabel: 'Écritures hors seuil / hors heures',
+          status: 'FAILED',
+          trigger: 'SCHEDULE',
+          startedAt: '2026-09-11T06:00:00Z',
+          finishedAt: '2026-09-11T06:00:04Z',
+          exceptionsCount: 0,
+          problem: { title: "Échec d'exécution", status: 502, detail: 'connexion CBS perdue', traceId: 'mock-run-01' },
+        },
+      ],
+    };
+    return HttpResponse.json(runs);
   }),
 
   // Fiche d'un contrôle.

@@ -5,7 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
-import { CcmControl } from '../../../libs/api-clients/ccm';
+import { CcmControl, CcmRun } from '../../../libs/api-clients/ccm';
 import { CcmFacade } from '../ccm.facade';
 import { CCM_CATEGORY_LABELS, CCM_HEALTH_LABELS } from '../ccm.labels';
 
@@ -84,6 +84,36 @@ import { CCM_CATEGORY_LABELS, CCM_HEALTH_LABELS } from '../ccm.labels';
             </table>
           </mat-card>
         }
+
+        <mat-card appearance="outlined" class="block">
+          <mat-card-header><mat-card-title>Exécutions récentes</mat-card-title></mat-card-header>
+          @if (runs().length) {
+            <table mat-table [dataSource]="runs()" data-cy="ccm-runs-table">
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Statut</th>
+                <td mat-cell *matCellDef="let r">
+                  <mat-chip-set><mat-chip disableRipple [attr.data-status]="r.status" data-cy="ccm-run-status">{{ runStatusLabel(r.status) }}</mat-chip></mat-chip-set>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="trigger">
+                <th mat-header-cell *matHeaderCellDef>Déclencheur</th>
+                <td mat-cell *matCellDef="let r">{{ r.trigger ?? '—' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="startedAt">
+                <th mat-header-cell *matHeaderCellDef>Début</th>
+                <td mat-cell *matCellDef="let r">{{ r.startedAt }}</td>
+              </ng-container>
+              <ng-container matColumnDef="exceptions">
+                <th mat-header-cell *matHeaderCellDef>Exceptions</th>
+                <td mat-cell *matCellDef="let r">{{ r.exceptionsCount ?? '—' }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="runColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: runColumns" data-cy="ccm-run-row"></tr>
+            </table>
+          } @else {
+            <mat-card-content><p data-cy="ccm-runs-empty">Aucune exécution historisée.</p></mat-card-content>
+          }
+        </mat-card>
       } @else if (notFound()) {
         <p data-cy="ccm-control-notfound">Contrôle introuvable.</p>
       } @else {
@@ -103,6 +133,9 @@ import { CCM_CATEGORY_LABELS, CCM_HEALTH_LABELS } from '../ccm.labels';
       mat-chip[data-health='FAILING'] { --mdc-chip-elevated-container-color: var(--ct-red-50); color: var(--ct-red-700); }
       mat-chip[data-health='DRIFT'] { --mdc-chip-elevated-container-color: var(--ct-amber-50); color: var(--ct-amber-700); }
       mat-chip[data-health='NEVER_RUN'] { --mdc-chip-elevated-container-color: var(--ct-color-surface-alt); color: var(--ct-color-muted); }
+      mat-chip[data-status='SUCCEEDED'] { --mdc-chip-elevated-container-color: var(--ct-green-50); color: var(--ct-green-600); }
+      mat-chip[data-status='FAILED'] { --mdc-chip-elevated-container-color: var(--ct-red-50); color: var(--ct-red-700); }
+      mat-chip[data-status='RUNNING'] { --mdc-chip-elevated-container-color: var(--ct-color-primary-soft); color: var(--ct-color-primary); }
     `,
   ],
 })
@@ -110,8 +143,10 @@ export class CcmControlDetailPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(CcmFacade);
   readonly control = signal<CcmControl | null>(null);
+  readonly runs = signal<CcmRun[]>([]);
   readonly notFound = signal(false);
   readonly paramColumns = ['name', 'type', 'value'];
+  readonly runColumns = ['status', 'trigger', 'startedAt', 'exceptions'];
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('controlId') ?? '';
@@ -120,7 +155,12 @@ export class CcmControlDetailPage implements OnInit {
         next: (c) => this.control.set(c),
         error: () => this.notFound.set(true),
       });
+      this.facade.listControlRuns(id).subscribe((p) => this.runs.set(p.items));
     }
+  }
+
+  runStatusLabel(status: CcmRun.StatusEnum): string {
+    return status === 'SUCCEEDED' ? 'Réussie' : status === 'FAILED' ? 'En échec' : 'En cours';
   }
 
   /** Valeur courante d'un paramètre (settings) sinon sa valeur par défaut (définition). */
