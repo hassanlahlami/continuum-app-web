@@ -9,7 +9,7 @@ describe('MIS-03 — Fiche mission (cockpit)', () => {
   it('affiche l\'identité de la mission et ses constats', () => {
     cy.visit(`/missions/${mission}`);
     cy.get('[data-cy=mission-title]').should('contain', 'Inspection agence A001');
-    cy.get('[data-cy=mission-findings] tbody [data-cy=finding-row]').should('have.length.at.least', 1);
+    cy.get('[data-cy=mission-findings] [data-cy=finding-row]').should('have.length.at.least', 1);
   });
 
   it('navigue vers le détail FRAP d\'un constat (→ FND-03)', () => {
