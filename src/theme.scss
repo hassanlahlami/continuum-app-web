@@ -1,0 +1,46 @@
+// Thème Angular Material (M3) ponté sur les tokens --ct-* du projet (§1.6).
+//
+// Principe : `mat.theme()` émet l'ensemble des variables système Material (`--mat-sys-*`) à partir d'une
+// palette de base, PUIS on re-pointe ces variables vers les tokens sémantiques --ct-* (définis dans
+// styles.css, et surchargés à l'exécution par la feuille du tenant GET /api/public/theme). Ainsi les
+// composants Material héritent automatiquement de la charte Continuum — y compris le thème par tenant et
+// le mode sombre — sans qu'aucune valeur visuelle ne soit codée en dur dans un composant.
+@use '@angular/material' as mat;
+
+html {
+  @include mat.theme((
+    color: (
+      theme-type: light,
+      primary: mat.$azure-palette,
+      tertiary: mat.$blue-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+
+  // — Pont : variables système Material -> tokens sémantiques Continuum —
+  --mat-sys-primary: var(--ct-color-primary);
+  --mat-sys-on-primary: var(--ct-color-primary-contrast);
+  --mat-sys-primary-container: var(--ct-color-primary-soft);
+  --mat-sys-on-primary-container: var(--ct-color-primary);
+
+  --mat-sys-background: var(--ct-color-bg);
+  --mat-sys-on-background: var(--ct-color-text);
+  --mat-sys-surface: var(--ct-color-surface);
+  --mat-sys-surface-container-low: var(--ct-color-surface);
+  --mat-sys-surface-container: var(--ct-color-surface-alt);
+  --mat-sys-surface-container-high: var(--ct-color-surface-alt);
+  --mat-sys-surface-container-highest: var(--ct-color-surface-alt);
+  --mat-sys-on-surface: var(--ct-color-text);
+  --mat-sys-on-surface-variant: var(--ct-color-muted);
+
+  --mat-sys-outline: var(--ct-color-border);
+  --mat-sys-outline-variant: var(--ct-color-border);
+  --mat-sys-error: var(--ct-red-700);
+
+  // Formes (rayons) depuis les tokens
+  --mat-sys-corner-extra-small: var(--ct-radius-sm);
+  --mat-sys-corner-small: var(--ct-radius-sm);
+  --mat-sys-corner-medium: var(--ct-radius-md);
+  --mat-sys-corner-large: var(--ct-radius-lg);
+}
