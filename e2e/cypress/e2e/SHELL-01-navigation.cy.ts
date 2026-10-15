@@ -27,4 +27,9 @@ describe('SHELL-01 — Coquille & navigation', () => {
     cy.visit('/findings');
     cy.get('[data-cy="nav-/findings"]').should('have.class', 'active-nav');
   });
+
+  it('affiche le fil d\'Ariane de la page courante', () => {
+    cy.visit('/ccm/overview');
+    cy.get('[data-cy=breadcrumb]').should('contain', 'Contrôle continu').and('contain', "Vue d'ensemble");
+  });
 });

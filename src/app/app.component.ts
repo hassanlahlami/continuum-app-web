@@ -6,8 +6,8 @@ import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { map } from 'rxjs/operators';
+import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { filter, map, startWith } from 'rxjs/operators';
 import { Me } from '../../libs/api-clients/me';
 import { ApiErrorStore } from './errors/api-error.store';
 import { MeFacade } from './me.facade';
@@ -89,7 +89,12 @@ interface NavGroup {
               <mat-icon>menu</mat-icon>
             </button>
           }
-          <span class="app-bar-title">Plateforme d'audit interne</span>
+          <nav class="breadcrumb" aria-label="Fil d'Ariane" data-cy="breadcrumb">
+            @for (c of crumbs(); track $index; let last = $last, first = $first) {
+              @if (!first) { <mat-icon class="crumb-sep" aria-hidden="true">chevron_right</mat-icon> }
+              <span [class.current]="last">{{ c }}</span>
+            }
+          </nav>
           <span class="spacer"></span>
           @if (me(); as user) {
             <div class="user" data-cy="app-user">
@@ -142,6 +147,9 @@ interface NavGroup {
         box-shadow: var(--ct-shadow-sm);
       }
       .app-bar-title { font-family: var(--ct-font-heading); font-weight: 600; font-size: 1rem; }
+      .breadcrumb { display: flex; align-items: center; gap: var(--ct-space-1); font-size: .9rem; color: var(--ct-color-muted); }
+      .breadcrumb .current { color: var(--ct-color-text); font-weight: 600; }
+      .breadcrumb .crumb-sep { font-size: 18px; width: 18px; height: 18px; color: var(--ct-color-muted); }
       .spacer { flex: 1 1 auto; }
       .user { display: flex; flex-direction: column; line-height: 1.15; text-align: right; }
       .user strong { font-size: .9rem; }
@@ -162,6 +170,8 @@ export class AppComponent implements OnInit {
   private readonly facade = inject(MeFacade);
   private readonly permissions = inject(PermissionsStore);
   protected readonly errors = inject(ApiErrorStore);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly me = signal<Me | null>(null);
   readonly isHandset = toSignal(
@@ -169,6 +179,16 @@ export class AppComponent implements OnInit {
       .observe([Breakpoints.Handset, Breakpoints.TabletPortrait])
       .pipe(map((r) => r.matches)),
     { initialValue: false },
+  );
+
+  /** Fil d'Ariane de la route courante (depuis `data.crumb`), recalculé à chaque navigation. */
+  readonly crumbs = toSignal(
+    this.router.events.pipe(
+      filter((e) => e instanceof NavigationEnd),
+      startWith(null),
+      map(() => this.buildCrumbs()),
+    ),
+    { initialValue: ['Accueil'] },
   );
 
   private readonly groups: NavGroup[] = [
@@ -205,5 +225,19 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     this.facade.currentUser().subscribe((user) => this.me.set(user));
     this.permissions.ensureLoaded().subscribe();
+  }
+
+  /** Remonte l'arbre de routes actif et renvoie le `crumb` le plus profond (sinon « Accueil »). */
+  private buildCrumbs(): string[] {
+    let snapshot = this.route.snapshot.firstChild;
+    let crumb: string[] | undefined;
+    while (snapshot) {
+      const data = snapshot.data['crumb'] as string[] | undefined;
+      if (data) {
+        crumb = data;
+      }
+      snapshot = snapshot.firstChild;
+    }
+    return crumb ?? ['Accueil'];
   }
 }
