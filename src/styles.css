@@ -323,3 +323,28 @@ tbody tr:hover { background: var(--ct-color-primary-soft); }
   border-radius: var(--ct-radius-md);
 }
 .api-error button { margin-left: auto; border: none; background: transparent; color: inherit; }
+
+/* ———————————————————————————— Chips sémantiques CCM ————————————————————————————
+ * Couleur par attribut data-* (criticité / statut d'exception / santé / statut de run), appliquée
+ * globalement aux mat-chip. Source de couleur = tokens --ct-* (§1.6). Centralisé ici pour cohérence
+ * entre toutes les pages.
+ */
+.mat-mdc-standard-chip[data-criticality='HIGH'],
+.mat-mdc-standard-chip[data-criticality='CRITICAL'] { --mdc-chip-elevated-container-color: var(--ct-red-50); color: var(--ct-red-700); }
+.mat-mdc-standard-chip[data-criticality='MEDIUM'] { --mdc-chip-elevated-container-color: var(--ct-amber-50); color: var(--ct-amber-700); }
+.mat-mdc-standard-chip[data-criticality='LOW'] { --mdc-chip-elevated-container-color: var(--ct-green-50); color: var(--ct-green-600); }
+
+.mat-mdc-standard-chip[data-status='NEW'] { --mdc-chip-elevated-container-color: var(--ct-amber-50); color: var(--ct-amber-700); }
+.mat-mdc-standard-chip[data-status='RETAINED'],
+.mat-mdc-standard-chip[data-status='ASSIGNED'] { --mdc-chip-elevated-container-color: var(--ct-blue-50); color: var(--ct-blue-700); }
+.mat-mdc-standard-chip[data-status='CONVERTED'] { --mdc-chip-elevated-container-color: var(--ct-green-50); color: var(--ct-green-600); }
+.mat-mdc-standard-chip[data-status='DISMISSED'] { --mdc-chip-elevated-container-color: var(--ct-color-surface-alt); color: var(--ct-color-muted); }
+
+.mat-mdc-standard-chip[data-health='OK'] { --mdc-chip-elevated-container-color: var(--ct-green-50); color: var(--ct-green-600); }
+.mat-mdc-standard-chip[data-health='FAILING'] { --mdc-chip-elevated-container-color: var(--ct-red-50); color: var(--ct-red-700); }
+.mat-mdc-standard-chip[data-health='DRIFT'] { --mdc-chip-elevated-container-color: var(--ct-amber-50); color: var(--ct-amber-700); }
+.mat-mdc-standard-chip[data-health='NEVER_RUN'] { --mdc-chip-elevated-container-color: var(--ct-color-surface-alt); color: var(--ct-color-muted); }
+
+.mat-mdc-standard-chip[data-status='SUCCEEDED'] { --mdc-chip-elevated-container-color: var(--ct-green-50); color: var(--ct-green-600); }
+.mat-mdc-standard-chip[data-status='FAILED'] { --mdc-chip-elevated-container-color: var(--ct-red-50); color: var(--ct-red-700); }
+.mat-mdc-standard-chip[data-status='RUNNING'] { --mdc-chip-elevated-container-color: var(--ct-blue-50); color: var(--ct-blue-700); }

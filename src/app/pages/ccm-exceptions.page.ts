@@ -43,12 +43,16 @@ import { CcmFacade } from '../ccm.facade';
               </ng-container>
               <ng-container matColumnDef="criticality">
                 <th mat-header-cell *matHeaderCellDef>Criticité</th>
-                <td mat-cell *matCellDef="let exc">{{ exc.criticality?.label ?? '—' }}</td>
+                <td mat-cell *matCellDef="let exc">
+                  @if (exc.criticality; as c) {
+                    <mat-chip-set><mat-chip disableRipple [attr.data-criticality]="c.code">{{ c.label }}</mat-chip></mat-chip-set>
+                  } @else { — }
+                </td>
               </ng-container>
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef>Statut</th>
                 <td mat-cell *matCellDef="let exc">
-                  <mat-chip-set><mat-chip disableRipple data-cy="ccm-exc-status">{{ exc.status.label }}</mat-chip></mat-chip-set>
+                  <mat-chip-set><mat-chip disableRipple data-cy="ccm-exc-status" [attr.data-status]="exc.status.code">{{ exc.status.label }}</mat-chip></mat-chip-set>
                 </td>
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="columns"></tr>
