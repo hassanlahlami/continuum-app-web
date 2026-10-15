@@ -45,7 +45,7 @@ describe('CCM-03 — Bibliothèque de contrôles', () => {
     cy.get('[data-cy=ccm-control-normative]').should('be.visible');
     cy.get('[data-cy=ccm-param-row]').should('have.length.at.least', 1);
     cy.get('[data-cy=ccm-control-health]').should('contain', 'Conforme');
-    cy.get('[data-cy=ccm-control-schedule]').should('contain', 'Planifiée');
+    cy.get('[data-cy=ccm-control-schedule]').should('contain', 'tous les jours');
     // Exécutions récentes (§5) : l'historique des runs du contrôle.
     cy.get('[data-cy=ccm-runs-table]').should('exist');
     cy.get('[data-cy=ccm-run-row]').should('have.length', 2);

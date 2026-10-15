@@ -1,3 +1,4 @@
+import { DatePipe, PercentPipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -5,9 +6,10 @@ import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
-import { CcmControl, CcmRun } from '../../../libs/api-clients/ccm';
+import { CcmControl, CcmControlParameterDefinitionsInner, CcmRun } from '../../../libs/api-clients/ccm';
 import { CcmFacade } from '../ccm.facade';
 import { CCM_CATEGORY_LABELS, CCM_HEALTH_LABELS } from '../ccm.labels';
+import { formatParameterValue, humanizeCron } from '../format';
 
 /**
  * Fiche d'un contrôle CCM (§5) : règle, référence normative, jeu de données, paramètres métier (définitions
@@ -16,7 +18,7 @@ import { CCM_CATEGORY_LABELS, CCM_HEALTH_LABELS } from '../ccm.labels';
 @Component({
   selector: 'ct-ccm-control-detail',
   standalone: true,
-  imports: [RouterLink, MatCardModule, MatTableModule, MatChipsModule, MatButtonModule, MatIconModule],
+  imports: [RouterLink, DatePipe, PercentPipe, MatCardModule, MatTableModule, MatChipsModule, MatButtonModule, MatIconModule],
   template: `
     <section>
       <a mat-button routerLink="/ccm/controls"><mat-icon>arrow_back</mat-icon> Bibliothèque de contrôles</a>
@@ -46,18 +48,18 @@ import { CCM_CATEGORY_LABELS, CCM_HEALTH_LABELS } from '../ccm.labels';
                 <dt>Jeu de données</dt><dd data-cy="ccm-control-dataset">{{ c.dataset }}</dd>
               }
               @if (c.lastRunAt) {
-                <dt>Dernière exécution</dt><dd>{{ c.lastRunAt }}</dd>
+                <dt>Dernière exécution</dt><dd>{{ c.lastRunAt | date: 'medium' }}</dd>
               }
               @if (c.nextRunAt) {
-                <dt>Prochaine exécution</dt><dd>{{ c.nextRunAt }}</dd>
+                <dt>Prochaine exécution</dt><dd>{{ c.nextRunAt | date: 'medium' }}</dd>
               }
               @if (c.exceptionRate != null) {
-                <dt>Taux d'exceptions</dt><dd>{{ c.exceptionRate }}</dd>
+                <dt>Taux d'exceptions</dt><dd>{{ c.exceptionRate | percent: '1.1-2' }}</dd>
               }
             </dl>
             @if (c.settings?.schedule; as sch) {
               <p data-cy="ccm-control-schedule">
-                Planification : {{ scheduleLabel(sch.mode) }}{{ sch.cron ? ' (' + sch.cron + ')' : '' }}
+                Planification : {{ sch.cron ? humanizeCron(sch.cron) : scheduleLabel(sch.mode) }}
               </p>
             }
           </mat-card-content>
@@ -77,7 +79,7 @@ import { CCM_CATEGORY_LABELS, CCM_HEALTH_LABELS } from '../ccm.labels';
               </ng-container>
               <ng-container matColumnDef="value">
                 <th mat-header-cell *matHeaderCellDef>Valeur</th>
-                <td mat-cell *matCellDef="let param">{{ parameterValue(c, param.name) }}</td>
+                <td mat-cell *matCellDef="let param">{{ parameterValue(c, param) }}</td>
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="paramColumns"></tr>
               <tr mat-row *matRowDef="let row; columns: paramColumns" data-cy="ccm-param-row"></tr>
@@ -101,7 +103,7 @@ import { CCM_CATEGORY_LABELS, CCM_HEALTH_LABELS } from '../ccm.labels';
               </ng-container>
               <ng-container matColumnDef="startedAt">
                 <th mat-header-cell *matHeaderCellDef>Début</th>
-                <td mat-cell *matCellDef="let r">{{ r.startedAt }}</td>
+                <td mat-cell *matCellDef="let r">{{ r.startedAt | date: 'short' }}</td>
               </ng-container>
               <ng-container matColumnDef="exceptions">
                 <th mat-header-cell *matHeaderCellDef>Exceptions</th>
@@ -163,14 +165,13 @@ export class CcmControlDetailPage implements OnInit {
     return status === 'SUCCEEDED' ? 'Réussie' : status === 'FAILED' ? 'En échec' : 'En cours';
   }
 
-  /** Valeur courante d'un paramètre (settings) sinon sa valeur par défaut (définition). */
-  parameterValue(c: CcmControl, name: string): string {
-    const current = c.settings?.parameters?.[name];
-    if (current !== undefined && current !== null) {
-      return Array.isArray(current) ? current.join(', ') : String(current);
-    }
-    const def = c.parameterDefinitions?.find((p) => p.name === name)?.default;
-    return def != null ? String(def) : '—';
+  readonly humanizeCron = humanizeCron;
+
+  /** Valeur courante d'un paramètre (settings) sinon sa valeur par défaut, formatée selon son type. */
+  parameterValue(c: CcmControl, param: CcmControlParameterDefinitionsInner): string {
+    const current = c.settings?.parameters?.[param.name];
+    const value = current ?? param.default;
+    return formatParameterValue(value, param.type);
   }
 
   categoryLabel(c: CcmControl.CategoryEnum): string {

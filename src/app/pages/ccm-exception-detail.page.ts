@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -27,6 +28,7 @@ import { CcmFacade } from '../ccm.facade';
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
+    DatePipe,
   ],
   template: `
     <section>
@@ -39,7 +41,7 @@ import { CcmFacade } from '../ccm.facade';
               <code>{{ e.controlCode }}</code>
               @if (e.criticality; as c) { · Criticité : {{ c.label }} }
               @if (e.unit; as u) { · Unité : {{ u.label }} }
-              · Détectée le {{ e.detectedAt }}
+              · Détectée le {{ e.detectedAt | date: 'medium' }}
             </mat-card-subtitle>
           </mat-card-header>
           <mat-card-content>
