@@ -1,6 +1,12 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { AvailableAction, CcmException } from '../../../libs/api-clients/ccm';
 import { CcmFacade } from '../ccm.facade';
 
@@ -8,81 +14,114 @@ import { CcmFacade } from '../ccm.facade';
  * Détail d'une exception CCM (§5.3, D34) : résumé, contrôle, criticité, enregistrement source du CBS, et
  * les <strong>actions de triage</strong> décidées par le serveur ({@code availableActions} — retenir /
  * écarter / affecter / rouvrir). Écarter exige une justification. Une exception <em>retenue</em> peut être
- * convertie en constat candidat dans une mission (§5.3). Le front n'invente aucune règle (D32).
+ * convertie en constat candidat (§5.3). Le front n'invente aucune règle (D32). Composants Material (--ct-*).
  */
 @Component({
   selector: 'ct-ccm-exception-detail',
   standalone: true,
-  imports: [RouterLink],
+  imports: [
+    RouterLink,
+    MatCardModule,
+    MatChipsModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+  ],
   template: `
     <section>
-      <a routerLink="/ccm">← Flux d'exceptions</a>
+      <a mat-button routerLink="/ccm"><mat-icon>arrow_back</mat-icon> Flux d'exceptions</a>
       @if (exc(); as e) {
-        <header>
-          <h1 data-cy="ccm-exc-summary">{{ e.summary || e.controlCode }}</h1>
-          <p>
-            <code>{{ e.controlCode }}</code> ·
-            <span data-cy="ccm-exc-status">{{ e.status.label }}</span>
-            @if (e.criticality; as c) { · Criticité : {{ c.label }} }
-            @if (e.unit; as u) { · Unité : {{ u.label }} }
-          </p>
-          <p>Détectée le {{ e.detectedAt }}</p>
-        </header>
+        <mat-card appearance="outlined" class="block">
+          <mat-card-header>
+            <mat-card-title data-cy="ccm-exc-summary">{{ e.summary || e.controlCode }}</mat-card-title>
+            <mat-card-subtitle>
+              <code>{{ e.controlCode }}</code>
+              @if (e.criticality; as c) { · Criticité : {{ c.label }} }
+              @if (e.unit; as u) { · Unité : {{ u.label }} }
+              · Détectée le {{ e.detectedAt }}
+            </mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-chip-set>
+              <mat-chip disableRipple data-cy="ccm-exc-status">{{ e.status.label }}</mat-chip>
+            </mat-chip-set>
 
-        @if (e.sourceRecord) {
-          <dl data-cy="ccm-source-record">
-            @for (entry of sourceEntries(e); track entry.key) {
-              <dt>{{ entry.key }}</dt><dd>{{ entry.value }}</dd>
+            @if (e.sourceRecord) {
+              <dl class="source" data-cy="ccm-source-record">
+                @for (entry of sourceEntries(e); track entry.key) {
+                  <dt>{{ entry.key }}</dt><dd>{{ entry.value }}</dd>
+                }
+              </dl>
             }
-          </dl>
-        }
-        @if (e.dismissalJustification) {
-          <p data-cy="ccm-exc-justification">Motif d'écart : {{ e.dismissalJustification }}</p>
-        }
-        @if (e.findingId) {
-          <p data-cy="ccm-exc-finding">Converti en constat : <code>{{ e.findingId }}</code></p>
-        }
-
-        @if (error(); as msg) {
-          <p class="error" role="alert" data-cy="ccm-action-error">{{ msg }}</p>
-        }
-
-        <label>Justification (écart)
-          <textarea #justif data-cy="ccm-justification" rows="2"></textarea>
-        </label>
-
-        @if (e.availableActions?.length) {
-          <nav class="actions" aria-label="Actions de triage">
-            @for (action of e.availableActions; track action.code) {
-              <button
-                type="button"
-                [attr.data-cy]="'ccm-action-' + action.code"
-                [class.primary]="action.style === 'primary'"
-                [disabled]="busy()"
-                (click)="run(e, action, justif.value)"
-              >{{ action.label }}</button>
+            @if (e.dismissalJustification) {
+              <p data-cy="ccm-exc-justification">Motif d'écart : {{ e.dismissalJustification }}</p>
             }
-          </nav>
-        }
+            @if (e.findingId) {
+              <p data-cy="ccm-exc-finding">Converti en constat : <code>{{ e.findingId }}</code></p>
+            }
+            @if (error(); as msg) {
+              <p class="error" role="alert" data-cy="ccm-action-error">{{ msg }}</p>
+            }
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="block">
+          <mat-card-header><mat-card-title>Triage</mat-card-title></mat-card-header>
+          <mat-card-content>
+            <mat-form-field appearance="outline" class="full">
+              <mat-label>Justification (écart)</mat-label>
+              <textarea matInput #justif data-cy="ccm-justification" rows="2"></textarea>
+            </mat-form-field>
+          </mat-card-content>
+          @if (e.availableActions?.length) {
+            <mat-card-actions align="end" data-cy="ccm-actions">
+              @for (action of e.availableActions; track action.code) {
+                @if (action.style === 'primary') {
+                  <button mat-flat-button color="primary" [attr.data-cy]="'ccm-action-' + action.code"
+                          [disabled]="busy()" (click)="run(e, action, justif.value)">{{ action.label }}</button>
+                } @else {
+                  <button mat-stroked-button [attr.data-cy]="'ccm-action-' + action.code"
+                          [disabled]="busy()" (click)="run(e, action, justif.value)">{{ action.label }}</button>
+                }
+              }
+            </mat-card-actions>
+          }
+        </mat-card>
 
         @if (e.status.code === 'RETAINED') {
-          <div class="convert" data-cy="ccm-convert-box">
-            <label>Mission d'accueil
-              <input #mission data-cy="ccm-convert-mission" [value]="defaultMissionId" />
-            </label>
-            <button type="button" data-cy="ccm-convert" [disabled]="busy()" (click)="convert(e, mission.value)">
-              Convertir en constat
-            </button>
-            @if (convertedRoute(); as r) {
-              <p data-cy="ccm-converted">Constat créé : <a [routerLink]="[r]">voir</a></p>
-            }
-          </div>
+          <mat-card appearance="outlined" class="block" data-cy="ccm-convert-box">
+            <mat-card-header><mat-card-title>Convertir en constat</mat-card-title></mat-card-header>
+            <mat-card-content>
+              <mat-form-field appearance="outline" class="full">
+                <mat-label>Mission d'accueil</mat-label>
+                <input matInput #mission data-cy="ccm-convert-mission" [value]="defaultMissionId" />
+              </mat-form-field>
+              @if (convertedRoute(); as r) {
+                <p data-cy="ccm-converted">Constat créé : <a [routerLink]="[r]">voir</a></p>
+              }
+            </mat-card-content>
+            <mat-card-actions align="end">
+              <button mat-flat-button color="primary" type="button" data-cy="ccm-convert"
+                      [disabled]="busy()" (click)="convert(e, mission.value)">Convertir en constat</button>
+            </mat-card-actions>
+          </mat-card>
         }
       } @else {
         <p>Chargement…</p>
       }
     </section>
   `,
+  styles: [
+    `
+      .block { margin-top: var(--ct-space-4); }
+      .full { width: 100%; max-width: 420px; }
+      code { font-family: var(--ct-font-mono); }
+      .source { display: grid; grid-template-columns: max-content 1fr; gap: var(--ct-space-1) var(--ct-space-4); margin: var(--ct-space-3) 0 0; }
+      .source dt { color: var(--ct-color-muted); } .source dd { margin: 0; }
+      .error { color: var(--ct-red-700); }
+    `,
+  ],
 })
 export class CcmExceptionDetailPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
