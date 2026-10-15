@@ -1,45 +1,70 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatTableModule } from '@angular/material/table';
 import { MissionPage } from '../../../libs/api-clients/missions';
 import { MissionsFacade } from '../missions.facade';
 
 /**
  * Liste des missions (archétype LISTE, §8) : recherche + pagination **côté serveur**, reflétées dans
  * l'URL (`?q=&page=`, partageable). Le serveur filtre selon le périmètre (feature `mission.read`).
+ * Composants Material habillés par les tokens --ct-*.
  */
 @Component({
   selector: 'ct-missions',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, MatCardModule, MatTableModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule],
   template: `
     <section>
       <h1>Missions</h1>
-      <form class="filters" (submit)="$event.preventDefault(); search(searchInput.value)">
-        <input #searchInput type="search" name="q" [value]="query()" placeholder="Rechercher…" aria-label="Rechercher" />
-        <button type="submit">Rechercher</button>
-      </form>
+      <mat-card appearance="outlined">
+        <mat-card-content>
+          <form class="filters" (submit)="$event.preventDefault(); search(searchInput.value)">
+            <mat-form-field appearance="outline" class="search">
+              <mat-label>Rechercher</mat-label>
+              <input matInput #searchInput type="search" name="q" [value]="query()" />
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+            <button mat-flat-button color="primary" type="submit">Rechercher</button>
+          </form>
+        </mat-card-content>
+      </mat-card>
+
       @if (page(); as p) {
         @if (p.items.length) {
-          <table>
-            <thead>
-              <tr><th>Référence</th><th>Titre</th><th>Statut</th><th>Avancement</th></tr>
-            </thead>
-            <tbody>
-              @for (mission of p.items; track mission.id) {
-                <tr>
-                  <td><a [routerLink]="['/missions', mission.id]"><code>{{ mission.reference }}</code></a></td>
-                  <td>{{ mission.title }}</td>
-                  <td>{{ mission.status.label }}</td>
-                  <td>{{ mission.progressPercent ?? 0 }}%</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-          <nav class="pager">
-            <button type="button" (click)="go(p.page - 1)" [disabled]="p.page <= 0">Précédent</button>
-            <span>Page {{ p.page + 1 }} / {{ p.totalPages }}</span>
-            <button type="button" (click)="go(p.page + 1)" [disabled]="p.page + 1 >= p.totalPages">Suivant</button>
-          </nav>
+          <mat-card appearance="outlined" class="table-card">
+            <table mat-table [dataSource]="p.items" data-cy="missions-table">
+              <ng-container matColumnDef="reference">
+                <th mat-header-cell *matHeaderCellDef>Référence</th>
+                <td mat-cell *matCellDef="let m">
+                  <a [routerLink]="['/missions', m.id]" data-cy="mission-link"><code>{{ m.reference }}</code></a>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="title">
+                <th mat-header-cell *matHeaderCellDef>Titre</th>
+                <td mat-cell *matCellDef="let m">{{ m.title }}</td>
+              </ng-container>
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Statut</th>
+                <td mat-cell *matCellDef="let m">{{ m.status.label }}</td>
+              </ng-container>
+              <ng-container matColumnDef="progress">
+                <th mat-header-cell *matHeaderCellDef>Avancement</th>
+                <td mat-cell *matCellDef="let m">{{ m.progressPercent ?? 0 }}%</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="columns"></tr>
+              <tr mat-row *matRowDef="let row; columns: columns" data-cy="mission-row"></tr>
+            </table>
+            <nav class="pager">
+              <button mat-stroked-button type="button" (click)="go(p.page - 1)" [disabled]="p.page <= 0">Précédent</button>
+              <span>Page {{ p.page + 1 }} / {{ p.totalPages }}</span>
+              <button mat-stroked-button type="button" (click)="go(p.page + 1)" [disabled]="p.page + 1 >= p.totalPages">Suivant</button>
+            </nav>
+          </mat-card>
         } @else {
           <p>Aucune mission pour ces critères.</p>
         }
@@ -48,6 +73,17 @@ import { MissionsFacade } from '../missions.facade';
       }
     </section>
   `,
+  styles: [
+    `
+      .filters { display: flex; gap: var(--ct-space-3); align-items: center; }
+      .search { min-width: 280px; }
+      .table-card { margin-top: var(--ct-space-4); padding: 0; overflow: hidden; }
+      table[mat-table] { width: 100%; background: transparent; }
+      code { font-family: var(--ct-font-mono); }
+      .pager { display: flex; align-items: center; gap: var(--ct-space-3); padding: var(--ct-space-3) var(--ct-space-4); }
+      .pager span { color: var(--ct-color-muted); }
+    `,
+  ],
 })
 export class MissionsPage implements OnInit {
   private readonly facade = inject(MissionsFacade);
@@ -55,6 +91,7 @@ export class MissionsPage implements OnInit {
   private readonly router = inject(Router);
   readonly page = signal<MissionPage | null>(null);
   readonly query = signal<string>('');
+  readonly columns = ['reference', 'title', 'status', 'progress'];
 
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((params) => {
