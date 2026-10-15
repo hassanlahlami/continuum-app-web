@@ -17,14 +17,16 @@ describe('CCM-03 — Bibliothèque de contrôles', () => {
 
   it('filtre par catégorie (serveur)', () => {
     cy.visit('/ccm/controls');
-    cy.get('[data-cy=ccm-controls-category]').select('TRANSACTIONS');
+    cy.get('[data-cy=ccm-controls-category]').click();
+    cy.get('mat-option').contains('Transactions').click();
     cy.get('[data-cy=ccm-control-row]').should('have.length', 1);
     cy.get('[data-cy=ccm-control-row] code').should('contain', 'SEUIL-HORAIRE');
   });
 
   it('filtre par état désactivé', () => {
     cy.visit('/ccm/controls');
-    cy.get('[data-cy=ccm-controls-active]').select('false');
+    cy.get('[data-cy=ccm-controls-active]').click();
+    cy.get('mat-option').contains('Désactivés').click();
     cy.get('[data-cy=ccm-control-row]').should('have.length', 1);
     cy.get('[data-cy=ccm-control-active]').should('contain', 'Désactivé');
   });
