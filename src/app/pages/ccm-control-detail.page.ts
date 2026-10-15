@@ -1,75 +1,88 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTableModule } from '@angular/material/table';
 import { CcmControl } from '../../../libs/api-clients/ccm';
 import { CcmFacade } from '../ccm.facade';
 import { CCM_CATEGORY_LABELS, CCM_HEALTH_LABELS } from '../ccm.labels';
 
 /**
  * Fiche d'un contrôle CCM (§5) : règle, référence normative, jeu de données, paramètres métier (définitions
- * + valeurs courantes), planification et état de santé. Lecture seule (D32) : le paramétrage (maker-checker,
- * {@code updateCcmControlSettings}) et l'exécution ({@code performCcmControlAction}) sont livrés plus tard
- * (ils dépendent de la table des exécutions {@code ccm_run}).
+ * + valeurs courantes), planification et santé. Lecture seule (D32). Composants Material (--ct-*).
  */
 @Component({
   selector: 'ct-ccm-control-detail',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, MatCardModule, MatTableModule, MatChipsModule, MatButtonModule, MatIconModule],
   template: `
     <section>
-      <a routerLink="/ccm/controls">← Bibliothèque de contrôles</a>
+      <a mat-button routerLink="/ccm/controls"><mat-icon>arrow_back</mat-icon> Bibliothèque de contrôles</a>
       @if (control(); as c) {
-        <header>
-          <h1 data-cy="ccm-control-label">{{ c.label }}</h1>
-          <p>
-            <code>{{ c.code }}</code> ·
-            {{ categoryLabel(c.category) }} ·
-            <span data-cy="ccm-control-active">{{ c.active ? 'Activé' : 'Désactivé' }}</span> ·
-            <span class="badge" data-cy="ccm-control-health" [attr.data-health]="c.health">{{ healthLabel(c.health) }}</span>
-          </p>
-        </header>
-
-        @if (c.description) {
-          <p data-cy="ccm-control-description">{{ c.description }}</p>
-        }
-
-        <dl class="meta">
-          @if (c.normativeReference) {
-            <dt>Référence normative</dt><dd data-cy="ccm-control-normative">{{ c.normativeReference }}</dd>
-          }
-          @if (c.dataset) {
-            <dt>Jeu de données</dt><dd data-cy="ccm-control-dataset">{{ c.dataset }}</dd>
-          }
-          @if (c.lastRunAt) {
-            <dt>Dernière exécution</dt><dd>{{ c.lastRunAt }}</dd>
-          }
-          @if (c.nextRunAt) {
-            <dt>Prochaine exécution</dt><dd>{{ c.nextRunAt }}</dd>
-          }
-          @if (c.exceptionRate != null) {
-            <dt>Taux d'exceptions</dt><dd>{{ c.exceptionRate }}</dd>
-          }
-        </dl>
+        <mat-card appearance="outlined" class="block">
+          <mat-card-header>
+            <mat-card-title data-cy="ccm-control-label">{{ c.label }}</mat-card-title>
+            <mat-card-subtitle>
+              <code>{{ c.code }}</code> · {{ categoryLabel(c.category) }} ·
+              <span data-cy="ccm-control-active">{{ c.active ? 'Activé' : 'Désactivé' }}</span>
+            </mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-chip-set>
+              <mat-chip disableRipple data-cy="ccm-control-health" [attr.data-health]="c.health">
+                {{ healthLabel(c.health) }}
+              </mat-chip>
+            </mat-chip-set>
+            @if (c.description) {
+              <p data-cy="ccm-control-description">{{ c.description }}</p>
+            }
+            <dl class="meta">
+              @if (c.normativeReference) {
+                <dt>Référence normative</dt><dd data-cy="ccm-control-normative">{{ c.normativeReference }}</dd>
+              }
+              @if (c.dataset) {
+                <dt>Jeu de données</dt><dd data-cy="ccm-control-dataset">{{ c.dataset }}</dd>
+              }
+              @if (c.lastRunAt) {
+                <dt>Dernière exécution</dt><dd>{{ c.lastRunAt }}</dd>
+              }
+              @if (c.nextRunAt) {
+                <dt>Prochaine exécution</dt><dd>{{ c.nextRunAt }}</dd>
+              }
+              @if (c.exceptionRate != null) {
+                <dt>Taux d'exceptions</dt><dd>{{ c.exceptionRate }}</dd>
+              }
+            </dl>
+            @if (c.settings?.schedule; as sch) {
+              <p data-cy="ccm-control-schedule">
+                Planification : {{ scheduleLabel(sch.mode) }}{{ sch.cron ? ' (' + sch.cron + ')' : '' }}
+              </p>
+            }
+          </mat-card-content>
+        </mat-card>
 
         @if (c.parameterDefinitions?.length) {
-          <h2>Paramètres métier</h2>
-          <table data-cy="ccm-control-parameters">
-            <thead><tr><th>Paramètre</th><th>Type</th><th>Valeur</th></tr></thead>
-            <tbody>
-              @for (param of c.parameterDefinitions; track param.name) {
-                <tr data-cy="ccm-param-row">
-                  <td>{{ param.label || param.name }}</td>
-                  <td>{{ param.type }}</td>
-                  <td>{{ parameterValue(c, param.name) }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        }
-
-        @if (c.settings?.schedule; as sch) {
-          <p data-cy="ccm-control-schedule">
-            Planification : {{ scheduleLabel(sch.mode) }}{{ sch.cron ? ' (' + sch.cron + ')' : '' }}
-          </p>
+          <mat-card appearance="outlined" class="block">
+            <mat-card-header><mat-card-title>Paramètres métier</mat-card-title></mat-card-header>
+            <table mat-table [dataSource]="c.parameterDefinitions ?? []" data-cy="ccm-control-parameters">
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Paramètre</th>
+                <td mat-cell *matCellDef="let param">{{ param.label || param.name }}</td>
+              </ng-container>
+              <ng-container matColumnDef="type">
+                <th mat-header-cell *matHeaderCellDef>Type</th>
+                <td mat-cell *matCellDef="let param">{{ param.type }}</td>
+              </ng-container>
+              <ng-container matColumnDef="value">
+                <th mat-header-cell *matHeaderCellDef>Valeur</th>
+                <td mat-cell *matCellDef="let param">{{ parameterValue(c, param.name) }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="paramColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: paramColumns" data-cy="ccm-param-row"></tr>
+            </table>
+          </mat-card>
         }
       } @else if (notFound()) {
         <p data-cy="ccm-control-notfound">Contrôle introuvable.</p>
@@ -78,12 +91,27 @@ import { CCM_CATEGORY_LABELS, CCM_HEALTH_LABELS } from '../ccm.labels';
       }
     </section>
   `,
+  styles: [
+    `
+      .block { margin-top: var(--ct-space-4); }
+      table[mat-table] { width: 100%; background: transparent; }
+      code { font-family: var(--ct-font-mono); }
+      .meta { display: grid; grid-template-columns: max-content 1fr; gap: var(--ct-space-1) var(--ct-space-4); margin: var(--ct-space-3) 0 0; }
+      .meta dt { color: var(--ct-color-muted); }
+      .meta dd { margin: 0; }
+      mat-chip[data-health='OK'] { --mdc-chip-elevated-container-color: var(--ct-green-50); color: var(--ct-green-600); }
+      mat-chip[data-health='FAILING'] { --mdc-chip-elevated-container-color: var(--ct-red-50); color: var(--ct-red-700); }
+      mat-chip[data-health='DRIFT'] { --mdc-chip-elevated-container-color: var(--ct-amber-50); color: var(--ct-amber-700); }
+      mat-chip[data-health='NEVER_RUN'] { --mdc-chip-elevated-container-color: var(--ct-color-surface-alt); color: var(--ct-color-muted); }
+    `,
+  ],
 })
 export class CcmControlDetailPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(CcmFacade);
   readonly control = signal<CcmControl | null>(null);
   readonly notFound = signal(false);
+  readonly paramColumns = ['name', 'type', 'value'];
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('controlId') ?? '';
