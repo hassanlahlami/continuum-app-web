@@ -1,10 +1,11 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { CcmControl } from '../../../libs/api-clients/ccm';
@@ -28,6 +29,7 @@ import { CCM_CATEGORY_LABELS, CCM_HEALTH_LABELS } from '../ccm.labels';
     MatSelectModule,
     MatButtonModule,
     MatChipsModule,
+    MatProgressBarModule,
   ],
   template: `
     <section>
@@ -102,15 +104,16 @@ import { CCM_CATEGORY_LABELS, CCM_HEALTH_LABELS } from '../ccm.labels';
                   </mat-chip-set>
                 </td>
               </ng-container>
-              <tr mat-header-row *matHeaderRowDef="columns"></tr>
-              <tr mat-row *matRowDef="let row; columns: columns" data-cy="ccm-control-row"></tr>
+              <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
+              <tr mat-row *matRowDef="let row; columns: columns" data-cy="ccm-control-row"
+                  class="clickable" (click)="open(row)"></tr>
             </table>
           </mat-card>
         } @else {
           <p data-cy="ccm-controls-empty">Aucun contrôle ne correspond aux filtres.</p>
         }
       } @else {
-        <p>Chargement…</p>
+        <mat-progress-bar mode="indeterminate" aria-label="Chargement"></mat-progress-bar>
       }
     </section>
   `,
@@ -122,6 +125,9 @@ import { CCM_CATEGORY_LABELS, CCM_HEALTH_LABELS } from '../ccm.labels';
       .filters mat-form-field { min-width: 180px; }
       .table-card { margin-top: var(--ct-space-4); padding: 0; overflow: hidden; }
       table[mat-table] { width: 100%; background: transparent; }
+      th.mat-mdc-header-cell { background: var(--ct-color-surface); }
+      tr.clickable { cursor: pointer; }
+      tr.clickable:hover { background: var(--ct-color-primary-soft); }
       code { font-family: var(--ct-font-mono); }
       mat-chip[data-health='OK'] { --mdc-chip-elevated-container-color: var(--ct-green-50); color: var(--ct-green-600); }
       mat-chip[data-health='FAILING'] { --mdc-chip-elevated-container-color: var(--ct-red-50); color: var(--ct-red-700); }
@@ -132,6 +138,7 @@ import { CCM_CATEGORY_LABELS, CCM_HEALTH_LABELS } from '../ccm.labels';
 })
 export class CcmControlsPage implements OnInit {
   private readonly facade = inject(CcmFacade);
+  private readonly router = inject(Router);
   readonly controls = signal<CcmControl[] | null>(null);
   readonly q = signal('');
   readonly category = signal<CcmControl.CategoryEnum | null>(null);
@@ -141,6 +148,11 @@ export class CcmControlsPage implements OnInit {
 
   ngOnInit(): void {
     this.reload();
+  }
+
+  /** Ouvre la fiche du contrôle (ligne entière cliquable). */
+  open(ctl: CcmControl): void {
+    this.router.navigate(['/ccm/controls', ctl.id]);
   }
 
   onCategory(value: string): void {

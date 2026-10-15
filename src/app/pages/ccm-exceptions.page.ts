@@ -1,8 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTableModule } from '@angular/material/table';
 import { CcmExceptionPage } from '../../../libs/api-clients/ccm';
 import { CcmFacade } from '../ccm.facade';
@@ -15,7 +16,7 @@ import { CcmFacade } from '../ccm.facade';
 @Component({
   selector: 'ct-ccm-exceptions',
   standalone: true,
-  imports: [RouterLink, MatCardModule, MatTableModule, MatChipsModule, MatButtonModule],
+  imports: [RouterLink, MatCardModule, MatTableModule, MatChipsModule, MatButtonModule, MatProgressBarModule],
   template: `
     <section>
       <header class="page-head">
@@ -55,15 +56,16 @@ import { CcmFacade } from '../ccm.facade';
                   <mat-chip-set><mat-chip disableRipple data-cy="ccm-exc-status" [attr.data-status]="exc.status.code">{{ exc.status.label }}</mat-chip></mat-chip-set>
                 </td>
               </ng-container>
-              <tr mat-header-row *matHeaderRowDef="columns"></tr>
-              <tr mat-row *matRowDef="let row; columns: columns" data-cy="ccm-row"></tr>
+              <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
+              <tr mat-row *matRowDef="let row; columns: columns" data-cy="ccm-row"
+                  class="clickable" (click)="open(row)"></tr>
             </table>
           </mat-card>
         } @else {
           <p data-cy="ccm-empty">Aucune exception à trier.</p>
         }
       } @else {
-        <p>Chargement…</p>
+        <mat-progress-bar mode="indeterminate" aria-label="Chargement"></mat-progress-bar>
       }
     </section>
   `,
@@ -74,16 +76,25 @@ import { CcmFacade } from '../ccm.facade';
       .page-sub { color: var(--ct-color-muted); margin-top: 0; }
       .table-card { padding: 0; overflow: hidden; }
       table[mat-table] { width: 100%; background: transparent; }
+      th.mat-mdc-header-cell { background: var(--ct-color-surface); }
+      tr.clickable { cursor: pointer; }
+      tr.clickable:hover { background: var(--ct-color-primary-soft); }
       code { font-family: var(--ct-font-mono); }
     `,
   ],
 })
 export class CcmExceptionsPage implements OnInit {
   private readonly facade = inject(CcmFacade);
+  private readonly router = inject(Router);
   readonly page = signal<CcmExceptionPage | null>(null);
   readonly columns = ['control', 'summary', 'criticality', 'status'];
 
   ngOnInit(): void {
     this.facade.listExceptions().subscribe((p) => this.page.set(p));
+  }
+
+  /** Ouvre le détail de l'exception (ligne entière cliquable). */
+  open(exc: { id: string }): void {
+    this.router.navigate(['/ccm/exceptions', exc.id]);
   }
 }
