@@ -14,6 +14,12 @@ describe('COM-04 — Accueil / Mes droits', () => {
     });
   });
 
+  it('affiche l\'instantané du contrôle continu', () => {
+    cy.visit('/');
+    cy.get('[data-cy=home-ccm]').should('exist');
+    cy.get('[data-cy=home-kpi-to-triage] strong').should('have.text', '2');
+  });
+
   it('navigue vers la vue transverse des constats', () => {
     cy.visit('/');
     cy.get('[data-cy=home-nav]').contains('a', 'Constats').click();
