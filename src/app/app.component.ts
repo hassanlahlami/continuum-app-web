@@ -96,6 +96,10 @@ interface NavGroup {
             }
           </nav>
           <span class="spacer"></span>
+          <button mat-icon-button (click)="cycleTheme()" data-cy="theme-toggle"
+                  [attr.aria-label]="'Thème : ' + theme()">
+            <mat-icon>{{ themeIcon() }}</mat-icon>
+          </button>
           @if (me(); as user) {
             <div class="user" data-cy="app-user">
               <strong>{{ user.user.displayName }}</strong>
@@ -174,6 +178,8 @@ export class AppComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
 
   readonly me = signal<Me | null>(null);
+  /** Préférence de thème : auto (système), clair ou sombre ; persistée par navigateur. */
+  readonly theme = signal<'auto' | 'light' | 'dark'>(this.readTheme());
   readonly isHandset = toSignal(
     inject(BreakpointObserver)
       .observe([Breakpoints.Handset, Breakpoints.TabletPortrait])
@@ -220,6 +226,42 @@ export class AppComponent implements OnInit {
   constructor() {
     // mat-icon rend les icônes « Material Symbols Outlined » (police auto-hébergée, D26).
     inject(MatIconRegistry).setDefaultFontSetClass('material-symbols-outlined');
+    this.applyTheme();
+  }
+
+  /** Bascule la préférence de thème : auto → clair → sombre → auto. */
+  cycleTheme(): void {
+    const next = this.theme() === 'auto' ? 'light' : this.theme() === 'light' ? 'dark' : 'auto';
+    this.theme.set(next);
+    try {
+      localStorage.setItem('ct-theme', next);
+    } catch {
+      // stockage indisponible (navigation privée) : la préférence reste pour la session.
+    }
+    this.applyTheme();
+  }
+
+  themeIcon(): string {
+    return this.theme() === 'light' ? 'light_mode' : this.theme() === 'dark' ? 'dark_mode' : 'brightness_auto';
+  }
+
+  private readTheme(): 'auto' | 'light' | 'dark' {
+    try {
+      const v = localStorage.getItem('ct-theme');
+      return v === 'light' || v === 'dark' ? v : 'auto';
+    } catch {
+      return 'auto';
+    }
+  }
+
+  /** Applique la préférence : `data-theme` explicite, ou retiré pour suivre le système (auto). */
+  private applyTheme(): void {
+    const el = document.documentElement;
+    if (this.theme() === 'auto') {
+      delete el.dataset.theme;
+    } else {
+      el.dataset.theme = this.theme();
+    }
   }
 
   ngOnInit(): void {

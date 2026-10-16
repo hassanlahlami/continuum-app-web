@@ -348,3 +348,45 @@ tbody tr:hover { background: var(--ct-color-primary-soft); }
 .mat-mdc-standard-chip[data-status='SUCCEEDED'] { --mdc-chip-elevated-container-color: var(--ct-green-50); color: var(--ct-green-600); }
 .mat-mdc-standard-chip[data-status='FAILED'] { --mdc-chip-elevated-container-color: var(--ct-red-50); color: var(--ct-red-700); }
 .mat-mdc-standard-chip[data-status='RUNNING'] { --mdc-chip-elevated-container-color: var(--ct-blue-50); color: var(--ct-blue-700); }
+
+/* ———————————————————————————— Mode sombre ————————————————————————————
+ * Redéfinit les tokens SÉMANTIQUES --ct-* en sombre : via `prefers-color-scheme` (sauf opt-out
+ * [data-theme=light]) et via [data-theme=dark] (bascule explicite). Le pont theme.scss propage
+ * ces tokens aux variables système Material → toute l'UI suit, sans valeur en dur dans les composants.
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --ct-color-bg: #0e1621;
+    --ct-color-surface: #16202b;
+    --ct-color-surface-alt: #1e2a37;
+    --ct-color-text: #e6edf3;
+    --ct-color-muted: #94a3b4;
+    --ct-color-border: #2a3a49;
+    --ct-color-primary: #4d9bff;
+    --ct-color-primary-hover: #6fb0ff;
+    --ct-color-primary-contrast: #0b1118;
+    --ct-color-primary-soft: #16304a;
+    --ct-blue-50: #16304a; --ct-blue-600: #4d9bff; --ct-blue-700: #8ab4ff;
+    --ct-green-50: #112a1c; --ct-green-600: #56d08a;
+    --ct-amber-50: #2a2210; --ct-amber-700: #f0c468;
+    --ct-red-50: #2b1514; --ct-red-100: #4a2420; --ct-red-700: #ff8f85;
+  }
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --ct-color-bg: #0e1621;
+  --ct-color-surface: #16202b;
+  --ct-color-surface-alt: #1e2a37;
+  --ct-color-text: #e6edf3;
+  --ct-color-muted: #94a3b4;
+  --ct-color-border: #2a3a49;
+  --ct-color-primary: #4d9bff;
+  --ct-color-primary-hover: #6fb0ff;
+  --ct-color-primary-contrast: #0b1118;
+  --ct-color-primary-soft: #16304a;
+  --ct-blue-50: #16304a; --ct-blue-600: #4d9bff; --ct-blue-700: #8ab4ff;
+  --ct-green-50: #112a1c; --ct-green-600: #56d08a;
+  --ct-amber-50: #2a2210; --ct-amber-700: #f0c468;
+  --ct-red-50: #2b1514; --ct-red-100: #4a2420; --ct-red-700: #ff8f85;
+}
