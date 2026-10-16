@@ -32,4 +32,12 @@ describe('SHELL-01 — Coquille & navigation', () => {
     cy.visit('/ccm/overview');
     cy.get('[data-cy=breadcrumb]').should('contain', 'Contrôle continu').and('contain', "Vue d'ensemble");
   });
+
+  it('bascule le thème (clair / sombre)', () => {
+    cy.visit('/');
+    cy.get('[data-cy=theme-toggle]').click(); // auto -> clair
+    cy.get('html').should('have.attr', 'data-theme', 'light');
+    cy.get('[data-cy=theme-toggle]').click(); // clair -> sombre
+    cy.get('html').should('have.attr', 'data-theme', 'dark');
+  });
 });
