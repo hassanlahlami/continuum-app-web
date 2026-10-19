@@ -19,28 +19,32 @@ html {
   ));
 
   // — Pont : variables système Material -> tokens sémantiques Continuum —
-  --mat-sys-primary: var(--ct-color-primary);
-  --mat-sys-on-primary: var(--ct-color-primary-contrast);
-  --mat-sys-primary-container: var(--ct-color-primary-soft);
-  --mat-sys-on-primary-container: var(--ct-color-primary);
+  // Encapsulé dans `& {}` : ces déclarations suivent une règle imbriquée (`mat.theme()`), ce que Dart
+  // Sass déprécie hors d'un bloc (avertissement `mixed-decls`). Le `& {}` préserve le comportement.
+  & {
+    --mat-sys-primary: var(--ct-color-primary);
+    --mat-sys-on-primary: var(--ct-color-primary-contrast);
+    --mat-sys-primary-container: var(--ct-color-primary-soft);
+    --mat-sys-on-primary-container: var(--ct-color-primary);
 
-  --mat-sys-background: var(--ct-color-bg);
-  --mat-sys-on-background: var(--ct-color-text);
-  --mat-sys-surface: var(--ct-color-surface);
-  --mat-sys-surface-container-low: var(--ct-color-surface);
-  --mat-sys-surface-container: var(--ct-color-surface-alt);
-  --mat-sys-surface-container-high: var(--ct-color-surface-alt);
-  --mat-sys-surface-container-highest: var(--ct-color-surface-alt);
-  --mat-sys-on-surface: var(--ct-color-text);
-  --mat-sys-on-surface-variant: var(--ct-color-muted);
+    --mat-sys-background: var(--ct-color-bg);
+    --mat-sys-on-background: var(--ct-color-text);
+    --mat-sys-surface: var(--ct-color-surface);
+    --mat-sys-surface-container-low: var(--ct-color-surface);
+    --mat-sys-surface-container: var(--ct-color-surface-alt);
+    --mat-sys-surface-container-high: var(--ct-color-surface-alt);
+    --mat-sys-surface-container-highest: var(--ct-color-surface-alt);
+    --mat-sys-on-surface: var(--ct-color-text);
+    --mat-sys-on-surface-variant: var(--ct-color-muted);
 
-  --mat-sys-outline: var(--ct-color-border);
-  --mat-sys-outline-variant: var(--ct-color-border);
-  --mat-sys-error: var(--ct-red-700);
+    --mat-sys-outline: var(--ct-color-border);
+    --mat-sys-outline-variant: var(--ct-color-border);
+    --mat-sys-error: var(--ct-red-700);
 
-  // Formes (rayons) depuis les tokens
-  --mat-sys-corner-extra-small: var(--ct-radius-sm);
-  --mat-sys-corner-small: var(--ct-radius-sm);
-  --mat-sys-corner-medium: var(--ct-radius-md);
-  --mat-sys-corner-large: var(--ct-radius-lg);
+    // Formes (rayons) depuis les tokens
+    --mat-sys-corner-extra-small: var(--ct-radius-sm);
+    --mat-sys-corner-small: var(--ct-radius-sm);
+    --mat-sys-corner-medium: var(--ct-radius-md);
+    --mat-sys-corner-large: var(--ct-radius-lg);
+  }
 }
