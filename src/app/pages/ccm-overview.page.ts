@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -17,7 +18,7 @@ import { CCM_HEALTH_LABELS } from '../ccm.labels';
 @Component({
   selector: 'ct-ccm-overview',
   standalone: true,
-  imports: [RouterLink, MatCardModule, MatTableModule, MatChipsModule, MatButtonModule, MatIconModule],
+  imports: [DatePipe, RouterLink, MatCardModule, MatTableModule, MatChipsModule, MatButtonModule, MatIconModule],
   template: `
     <section>
       <header class="page-head">
@@ -58,15 +59,22 @@ import { CCM_HEALTH_LABELS } from '../ccm.labels';
           <mat-card appearance="outlined" class="block">
             <mat-card-header><mat-card-title>Tendance des détections</mat-card-title></mat-card-header>
             <mat-card-content>
-              <ul class="trend" data-cy="ccm-trend">
-                @for (point of trend(); track point.date) {
-                  <li data-cy="ccm-trend-point">
-                    <span class="date">{{ point.date }}</span>
-                    <span class="bar" [style.--ct-bar-ratio]="ratio(point.count)" aria-hidden="true"></span>
-                    <span class="count">{{ point.count }}</span>
-                  </li>
+              <svg class="trend-chart" data-cy="ccm-trend" role="img"
+                   aria-label="Tendance des détections d'exceptions par jour"
+                   [attr.viewBox]="'0 0 ' + chart().width + ' ' + chart().height" preserveAspectRatio="xMidYMid meet">
+                <line class="axis" [attr.x1]="6" [attr.y1]="chart().baselineY"
+                      [attr.x2]="chart().width - 6" [attr.y2]="chart().baselineY" />
+                @for (b of chart().bars; track b.date) {
+                  <g data-cy="ccm-trend-point">
+                    <title>{{ b.date | date: 'longDate' }} : {{ b.count }}</title>
+                    <rect class="bar" [attr.x]="b.x" [attr.y]="b.y" [attr.width]="b.w" [attr.height]="b.h" rx="4" />
+                    <text class="val" [attr.x]="b.cx" [attr.y]="b.y - 6" text-anchor="middle">{{ b.count }}</text>
+                    <text class="lbl" [attr.x]="b.cx" [attr.y]="chart().baselineY + 18" text-anchor="middle">
+                      {{ b.date | date: 'dd/MM' }}
+                    </text>
+                  </g>
                 }
-              </ul>
+              </svg>
             </mat-card-content>
           </mat-card>
         }
@@ -119,11 +127,12 @@ import { CCM_HEALTH_LABELS } from '../ccm.labels';
       .kpi.warn strong, .kpi.warn .kpi-ic { color: var(--ct-amber-700); }
       .block { margin-bottom: var(--ct-space-4); }
       table[mat-table] { width: 100%; background: transparent; }
-      .trend { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--ct-space-2); }
-      .trend li { display: grid; grid-template-columns: 110px 1fr 40px; align-items: center; gap: var(--ct-space-3); }
-      .trend .date { color: var(--ct-color-muted); font-size: .82rem; }
-      .trend .bar { height: 10px; border-radius: var(--ct-radius-pill); background: var(--ct-color-primary); width: calc(var(--ct-bar-ratio, 0) * 100%); min-width: 4px; }
-      .trend .count { text-align: right; font-variant-numeric: tabular-nums; }
+      .trend-chart { width: 100%; max-width: 560px; height: auto; display: block; }
+      .trend-chart .bar { fill: var(--ct-color-primary); transition: fill .15s; }
+      .trend-chart g:hover .bar { fill: var(--ct-color-primary-hover); }
+      .trend-chart .axis { stroke: var(--ct-color-border); stroke-width: 1; }
+      .trend-chart .val { fill: var(--ct-color-text); font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+      .trend-chart .lbl { fill: var(--ct-color-muted); font-size: 11px; }
       mat-chip[data-health='OK'] { --mdc-chip-elevated-container-color: var(--ct-green-50); color: var(--ct-green-600); }
       mat-chip[data-health='FAILING'] { --mdc-chip-elevated-container-color: var(--ct-red-50); color: var(--ct-red-700); }
       mat-chip[data-health='DRIFT'] { --mdc-chip-elevated-container-color: var(--ct-amber-50); color: var(--ct-amber-700); }
@@ -135,15 +144,29 @@ export class CcmOverviewPage implements OnInit {
   private readonly facade = inject(CcmFacade);
   readonly overview = signal<CcmOverview | null>(null);
   readonly trend = computed(() => this.overview()?.exceptionTrend ?? []);
-  private readonly maxCount = computed(() => Math.max(1, ...this.trend().map((p) => p.count ?? 0)));
   readonly controlColumns = ['label', 'active', 'health'];
+
+  /** Géométrie du diagramme à colonnes (série unique, tendance quotidienne). Mono-teinte --ct-color-primary. */
+  readonly chart = computed(() => {
+    const pts = this.trend();
+    const slot = 86;
+    const barW = 44;
+    const top = 16;
+    const bottom = 28;
+    const plotH = 120;
+    const baselineY = top + plotH;
+    const max = Math.max(1, ...pts.map((p) => p.count ?? 0));
+    const bars = pts.map((p, i) => {
+      const count = p.count ?? 0;
+      const h = (count / max) * plotH;
+      const x = 6 + i * slot + (slot - barW) / 2;
+      return { date: p.date, count, x, w: barW, y: baselineY - h, h, cx: x + barW / 2 };
+    });
+    return { width: 6 + pts.length * slot + 6, height: baselineY + bottom, baselineY, bars };
+  });
 
   ngOnInit(): void {
     this.facade.getOverview().subscribe((o) => this.overview.set(o));
-  }
-
-  ratio(count?: number): number {
-    return (count ?? 0) / this.maxCount();
   }
 
   healthLabel(h: CcmControl.HealthEnum): string {
