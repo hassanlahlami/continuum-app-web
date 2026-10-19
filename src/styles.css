@@ -330,24 +330,29 @@ tbody tr:hover { background: var(--ct-color-primary-soft); }
  * entre toutes les pages.
  */
 .mat-mdc-standard-chip[data-criticality='HIGH'],
-.mat-mdc-standard-chip[data-criticality='CRITICAL'] { --mdc-chip-elevated-container-color: var(--ct-red-50); color: var(--ct-red-700); }
-.mat-mdc-standard-chip[data-criticality='MEDIUM'] { --mdc-chip-elevated-container-color: var(--ct-amber-50); color: var(--ct-amber-700); }
-.mat-mdc-standard-chip[data-criticality='LOW'] { --mdc-chip-elevated-container-color: var(--ct-green-50); color: var(--ct-green-600); }
+.mat-mdc-standard-chip[data-criticality='CRITICAL'] { --mdc-chip-elevated-container-color: var(--ct-red-50); --mdc-chip-label-text-color: var(--ct-red-700); color: var(--ct-red-700); }
+.mat-mdc-standard-chip[data-criticality='MEDIUM'] { --mdc-chip-elevated-container-color: var(--ct-amber-50); --mdc-chip-label-text-color: var(--ct-amber-700); color: var(--ct-amber-700); }
+.mat-mdc-standard-chip[data-criticality='LOW'] { --mdc-chip-elevated-container-color: var(--ct-green-50); --mdc-chip-label-text-color: var(--ct-green-600); color: var(--ct-green-600); }
 
-.mat-mdc-standard-chip[data-status='NEW'] { --mdc-chip-elevated-container-color: var(--ct-amber-50); color: var(--ct-amber-700); }
+.mat-mdc-standard-chip[data-status='NEW'] { --mdc-chip-elevated-container-color: var(--ct-amber-50); --mdc-chip-label-text-color: var(--ct-amber-700); color: var(--ct-amber-700); }
 .mat-mdc-standard-chip[data-status='RETAINED'],
-.mat-mdc-standard-chip[data-status='ASSIGNED'] { --mdc-chip-elevated-container-color: var(--ct-blue-50); color: var(--ct-blue-700); }
-.mat-mdc-standard-chip[data-status='CONVERTED'] { --mdc-chip-elevated-container-color: var(--ct-green-50); color: var(--ct-green-600); }
-.mat-mdc-standard-chip[data-status='DISMISSED'] { --mdc-chip-elevated-container-color: var(--ct-color-surface-alt); color: var(--ct-color-muted); }
+.mat-mdc-standard-chip[data-status='ASSIGNED'] { --mdc-chip-elevated-container-color: var(--ct-blue-50); --mdc-chip-label-text-color: var(--ct-blue-700); color: var(--ct-blue-700); }
+.mat-mdc-standard-chip[data-status='CONVERTED'] { --mdc-chip-elevated-container-color: var(--ct-green-50); --mdc-chip-label-text-color: var(--ct-green-600); color: var(--ct-green-600); }
+.mat-mdc-standard-chip[data-status='DISMISSED'] { --mdc-chip-elevated-container-color: var(--ct-color-surface-alt); --mdc-chip-label-text-color: var(--ct-color-muted); color: var(--ct-color-muted); }
 
-.mat-mdc-standard-chip[data-health='OK'] { --mdc-chip-elevated-container-color: var(--ct-green-50); color: var(--ct-green-600); }
-.mat-mdc-standard-chip[data-health='FAILING'] { --mdc-chip-elevated-container-color: var(--ct-red-50); color: var(--ct-red-700); }
-.mat-mdc-standard-chip[data-health='DRIFT'] { --mdc-chip-elevated-container-color: var(--ct-amber-50); color: var(--ct-amber-700); }
-.mat-mdc-standard-chip[data-health='NEVER_RUN'] { --mdc-chip-elevated-container-color: var(--ct-color-surface-alt); color: var(--ct-color-muted); }
+.mat-mdc-standard-chip[data-health='OK'] { --mdc-chip-elevated-container-color: var(--ct-green-50); --mdc-chip-label-text-color: var(--ct-green-600); color: var(--ct-green-600); }
+.mat-mdc-standard-chip[data-health='FAILING'] { --mdc-chip-elevated-container-color: var(--ct-red-50); --mdc-chip-label-text-color: var(--ct-red-700); color: var(--ct-red-700); }
+.mat-mdc-standard-chip[data-health='DRIFT'] { --mdc-chip-elevated-container-color: var(--ct-amber-50); --mdc-chip-label-text-color: var(--ct-amber-700); color: var(--ct-amber-700); }
+.mat-mdc-standard-chip[data-health='NEVER_RUN'] { --mdc-chip-elevated-container-color: var(--ct-color-surface-alt); --mdc-chip-label-text-color: var(--ct-color-muted); color: var(--ct-color-muted); }
 
-.mat-mdc-standard-chip[data-status='SUCCEEDED'] { --mdc-chip-elevated-container-color: var(--ct-green-50); color: var(--ct-green-600); }
-.mat-mdc-standard-chip[data-status='FAILED'] { --mdc-chip-elevated-container-color: var(--ct-red-50); color: var(--ct-red-700); }
-.mat-mdc-standard-chip[data-status='RUNNING'] { --mdc-chip-elevated-container-color: var(--ct-blue-50); color: var(--ct-blue-700); }
+.mat-mdc-standard-chip[data-status='SUCCEEDED'] { --mdc-chip-elevated-container-color: var(--ct-green-50); --mdc-chip-label-text-color: var(--ct-green-600); color: var(--ct-green-600); }
+.mat-mdc-standard-chip[data-status='FAILED'] { --mdc-chip-elevated-container-color: var(--ct-red-50); --mdc-chip-label-text-color: var(--ct-red-700); color: var(--ct-red-700); }
+.mat-mdc-standard-chip[data-status='RUNNING'] { --mdc-chip-elevated-container-color: var(--ct-blue-50); --mdc-chip-label-text-color: var(--ct-blue-700); color: var(--ct-blue-700); }
+
+/* La vignette (label) MDC hérite de la couleur sémantique du chip (lisibilité en clair ET sombre). */
+.mat-mdc-standard-chip[data-criticality] .mdc-evolution-chip__text-label,
+.mat-mdc-standard-chip[data-status] .mdc-evolution-chip__text-label,
+.mat-mdc-standard-chip[data-health] .mdc-evolution-chip__text-label { color: inherit; }
 
 /* ———————————————————————————— Mode sombre ————————————————————————————
  * Redéfinit les tokens SÉMANTIQUES --ct-* en sombre : via `prefers-color-scheme` (sauf opt-out
