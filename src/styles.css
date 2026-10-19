@@ -15,13 +15,13 @@
   --ct-slate-100: #eef2f6;
   --ct-slate-200: #e3e9ef;
   --ct-slate-300: #d2dbe4;
-  --ct-slate-500: #6b7a8d;
+  --ct-slate-500: #5e6c7c; /* muted : ≥4.5:1 (WCAG AA) sur surface/alt/bg en clair */
   --ct-slate-700: #37424f;
   --ct-slate-900: #16202b;
   --ct-green-50: #e9f7ef;
-  --ct-green-600: #1f8f52;
+  --ct-green-600: #1a7a45; /* ≥4.5:1 sur green-50 (texte de chip LOW/OK/SUCCEEDED) */
   --ct-amber-50: #fdf3e3;
-  --ct-amber-700: #9a6700;
+  --ct-amber-700: #8f6000; /* ≥4.5:1 sur amber-50 (texte de chip MEDIUM/NEW/DRIFT) */
   --ct-red-50: #fdecea;
   --ct-red-100: #f3c6c0;
   --ct-red-700: #a1281c;
