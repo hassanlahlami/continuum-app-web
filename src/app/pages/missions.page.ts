@@ -27,7 +27,7 @@ import { MissionsFacade } from '../missions.facade';
           <form class="filters" (submit)="$event.preventDefault(); search(searchInput.value)">
             <mat-form-field appearance="outline" class="search">
               <mat-label>Rechercher</mat-label>
-              <input matInput #searchInput type="search" name="q" [value]="query()" />
+              <input matInput #searchInput type="search" name="q" [value]="query()" data-cy="missions-search" />
               <mat-icon matSuffix>search</mat-icon>
             </mat-form-field>
             <button mat-flat-button color="primary" type="submit">Rechercher</button>
