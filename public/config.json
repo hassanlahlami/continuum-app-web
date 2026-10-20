@@ -1,0 +1,6 @@
+{
+  "_comment": "Configuration d'exécution par installation (on-premise). Éditée par l'intégrateur APRÈS le build — aucune reconstruction nécessaire. Surcharge les valeurs du build (environment.*). apiBaseUrl reste relatif derrière le reverse-proxy.",
+  "oidcIssuer": "http://localhost:8180/realms/banque-demo",
+  "apiBaseUrl": "/api/app",
+  "tenantCode": "BANQUE-DEMO"
+}
