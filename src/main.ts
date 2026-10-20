@@ -9,13 +9,47 @@ import { OAuthService, provideOAuthClient } from 'angular-oauth2-oidc';
 import { BASE_PATH } from '../libs/api-clients/me';
 import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
-import { authConfig } from './app/auth/auth.config';
+import { buildAuthConfig } from './app/auth/auth.config';
 import { authInterceptor } from './app/auth/auth.interceptor';
 import { errorInterceptor } from './app/errors/error.interceptor';
 import { environment } from './environments/environment';
 
 // Locale française : formatage des dates, nombres, montants et pourcentages (§1.6, i18n).
 registerLocaleData(localeFr);
+
+/**
+ * Configuration d'exécution **par installation** (on-premise, D26) : un seul artefact buildé, dont
+ * l'issuer OIDC, l'URL d'API et le code tenant sont fixés par `config.json` servi à la racine — édité
+ * par l'intégrateur sans reconstruction. Les valeurs du build (`environment.*`) servent de défauts si
+ * le fichier est absent ou illisible.
+ */
+interface RuntimeConfig {
+  oidcIssuer: string;
+  apiBaseUrl: string;
+  tenantCode: string;
+}
+
+async function loadRuntimeConfig(): Promise<RuntimeConfig> {
+  const defaults: RuntimeConfig = {
+    oidcIssuer: environment.oidcIssuer,
+    apiBaseUrl: environment.apiBaseUrl,
+    tenantCode: environment.tenantCode,
+  };
+  try {
+    const res = await fetch(new URL('config.json', document.baseURI).href, { cache: 'no-store' });
+    if (!res.ok) {
+      return defaults;
+    }
+    const raw = (await res.json()) as Partial<RuntimeConfig>;
+    return {
+      oidcIssuer: typeof raw.oidcIssuer === 'string' && raw.oidcIssuer ? raw.oidcIssuer : defaults.oidcIssuer,
+      apiBaseUrl: typeof raw.apiBaseUrl === 'string' && raw.apiBaseUrl ? raw.apiBaseUrl : defaults.apiBaseUrl,
+      tenantCode: typeof raw.tenantCode === 'string' && raw.tenantCode ? raw.tenantCode : defaults.tenantCode,
+    };
+  } catch {
+    return defaults; // config.json absent/illisible : on garde les valeurs du build
+  }
+}
 
 /**
  * Amorçage de la Plateforme Fonctionnelle (§4.2, composants standalone) : HTTP + intercepteur de
@@ -36,9 +70,9 @@ async function startMocksInDev(): Promise<void> {
  * client. La feuille servie par {@code GET /api/public/theme} surcharge les tokens --ct-* par défaut
  * (styles.css). En cas d'indisponibilité, l'apparence par défaut reste valable.
  */
-async function loadTenantTheme(): Promise<void> {
+async function loadTenantTheme(tenantCode: string): Promise<void> {
   try {
-    const res = await fetch(`/api/public/theme?entity=${encodeURIComponent(environment.tenantCode)}`);
+    const res = await fetch(`/api/public/theme?entity=${encodeURIComponent(tenantCode)}`);
     if (res.ok) {
       const style = document.createElement('style');
       style.id = 'ct-tenant-theme';
@@ -51,8 +85,12 @@ async function loadTenantTheme(): Promise<void> {
 }
 
 startMocksInDev()
-  .then(loadTenantTheme)
-  .then(() =>
+  .then(loadRuntimeConfig)
+  .then(async (config) => {
+    await loadTenantTheme(config.tenantCode);
+    return config;
+  })
+  .then((config) =>
     bootstrapApplication(AppComponent, {
       providers: [
         { provide: LOCALE_ID, useValue: 'fr' },
@@ -60,10 +98,10 @@ startMocksInDev()
         provideAnimationsAsync(),
         provideRouter(routes),
         provideOAuthClient(),
-        { provide: BASE_PATH, useValue: environment.apiBaseUrl },
+        { provide: BASE_PATH, useValue: config.apiBaseUrl },
         provideAppInitializer(() => {
           const oauth = inject(OAuthService);
-          oauth.configure(authConfig);
+          oauth.configure(buildAuthConfig(config.oidcIssuer));
           // Mode mocks : best-effort (« sans backend/login », cf. environment). Si Keycloak est absent,
           // l'échec du document de découverte ne doit pas empêcher l'amorçage — on reste déconnecté.
           // Mode live : on exige la connexion (redirection vers Keycloak si pas de jeton valide), §4.5.
