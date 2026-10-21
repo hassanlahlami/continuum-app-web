@@ -46,8 +46,18 @@ export class CcmFacade {
   }
 
   /** Flux d'exceptions à trier (filtrable par statut), périmètre appliqué par le serveur. */
-  listExceptions(status?: string[]): Observable<CcmExceptionPage> {
-    return this.api.listCcmExceptions(undefined, undefined, undefined, status);
+  listExceptions(opts: { status?: string[]; assignedToMe?: boolean } = {}): Observable<CcmExceptionPage> {
+    return this.api.listCcmExceptions(
+      undefined, // page
+      undefined, // size
+      undefined, // sort
+      opts.status,
+      undefined, // unitId
+      undefined, // controlId
+      undefined, // runId
+      undefined, // criticality
+      opts.assignedToMe || undefined,
+    );
   }
 
   /** Détail d'une exception (jusqu'à l'enregistrement source du CBS). */

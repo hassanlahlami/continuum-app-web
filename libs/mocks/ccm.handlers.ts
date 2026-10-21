@@ -201,8 +201,12 @@ export const ccmHandlers = [
       : HttpResponse.json({ title: 'Contrôle introuvable' }, { status: 404 });
   }),
 
-  // Flux d'exceptions à trier.
-  http.get('*/api/app/ccm/exceptions', () => HttpResponse.json(ccmExceptionPageFixture)),
+  // Flux d'exceptions à trier (filtre `assignedToMe` : seule l'exception NEW est affectée au courant).
+  http.get('*/api/app/ccm/exceptions', ({ request }) => {
+    const mine = new URL(request.url).searchParams.get('assignedToMe') === 'true';
+    const items = ccmExceptionPageFixture.items.filter((e) => !mine || e.id === NEW_ID);
+    return HttpResponse.json({ ...ccmExceptionPageFixture, totalItems: items.length, items });
+  }),
 
   // Détail d'une exception (jusqu'à l'enregistrement source du CBS).
   http.get('*/api/app/ccm/exceptions/:exceptionId', ({ params }) =>
