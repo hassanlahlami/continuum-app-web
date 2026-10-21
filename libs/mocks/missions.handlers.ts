@@ -14,15 +14,54 @@ export const missionFixture: Mission = {
   meta: { createdAt: '2026-01-05T09:00:00Z', version: 3 },
 };
 
+const ALL_MISSIONS: Mission[] = [
+  missionFixture,
+  {
+    id: 'a1c2e3f4-0000-0000-0000-000000000002',
+    reference: 'MIS-2026-AUD-009',
+    title: 'Audit du processus crédits',
+    missionType: { code: 'AUDIT', label: 'Audit' },
+    status: { code: 'PLANNED', label: 'Planifiée' },
+    phase: { code: 'PREPARATION', label: 'Préparation' },
+    unit: { id: '3f6c2a1e-8b7d-4c21-9a55-0e2f4b6d8c10', label: 'Inspection Générale' },
+    progressPercent: 5,
+    meta: { createdAt: '2026-01-20T09:00:00Z', version: 1 },
+  },
+  {
+    id: 'a1c2e3f4-0000-0000-0000-000000000003',
+    reference: 'MIS-2025-INSP-051',
+    title: 'Inspection agence B204',
+    missionType: { code: 'INSPECTION', label: 'Inspection' },
+    status: { code: 'CLOSED', label: 'Clôturée' },
+    phase: { code: 'CLOTURE', label: 'Clôture' },
+    unit: { id: '3f6c2a1e-8b7d-4c21-9a55-0e2f4b6d8c10', label: 'Inspection Générale' },
+    progressPercent: 100,
+    meta: { createdAt: '2025-11-02T09:00:00Z', version: 7 },
+  },
+];
+
+/** Missions affectées à l'utilisateur courant (filtre `mine=true`). */
+const MY_MISSION_IDS = new Set(['9b2d7e4a-1c3f-4a6b-8d5e-7f0a1b2c3d4e']);
+
 export const missionsPageFixture: MissionPage = {
   page: 0,
   size: 20,
-  totalItems: 1,
+  totalItems: ALL_MISSIONS.length,
   totalPages: 1,
-  items: [missionFixture],
+  items: ALL_MISSIONS,
 };
 
 export const missionsHandlers = [
-  http.get('*/api/app/missions', () => HttpResponse.json(missionsPageFixture)),
+  http.get('*/api/app/missions', ({ request }) => {
+    const url = new URL(request.url);
+    const q = url.searchParams.get('q')?.toLowerCase();
+    const mine = url.searchParams.get('mine') === 'true';
+    const items = ALL_MISSIONS.filter(
+      (m) =>
+        (!q || `${m.reference} ${m.title}`.toLowerCase().includes(q)) &&
+        (!mine || MY_MISSION_IDS.has(m.id)),
+    );
+    return HttpResponse.json({ page: 0, size: 20, totalItems: items.length, totalPages: 1, items });
+  }),
   http.get('*/api/app/missions/:missionId', () => HttpResponse.json(missionFixture)),
 ];

@@ -7,8 +7,20 @@ import { Mission, MissionPage, MissionsService } from '../../libs/api-clients/mi
 export class MissionsFacade {
   private readonly api = inject(MissionsService);
 
-  list(page = 0, size = 20, q?: string): Observable<MissionPage> {
-    return this.api.listMissions(page, size, undefined, q);
+  list(page = 0, size = 20, opts: { q?: string; from?: string; to?: string; mine?: boolean } = {}): Observable<MissionPage> {
+    return this.api.listMissions(
+      page,
+      size,
+      undefined, // sort
+      opts.q || undefined,
+      undefined, // status
+      undefined, // unitId
+      opts.from || undefined,
+      opts.to || undefined,
+      undefined, // missionTypeCode
+      undefined, // auditPlanId
+      opts.mine || undefined,
+    );
   }
 
   get(missionId: string): Observable<Mission> {
