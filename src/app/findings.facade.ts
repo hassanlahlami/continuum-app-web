@@ -7,8 +7,21 @@ import { Finding, FindingPage, FindingsService } from '../../libs/api-clients/fi
 export class FindingsFacade {
   private readonly api = inject(FindingsService);
 
-  search(): Observable<FindingPage> {
-    return this.api.searchFindings();
+  /** Vue transverse filtrée (serveur) : recherche libre, source, criticité, plage de dates (§8). */
+  search(opts: { q?: string; source?: 'MANUAL' | 'CCM'; criticality?: string; from?: string; to?: string } = {}): Observable<FindingPage> {
+    return this.api.searchFindings(
+      undefined, // page
+      undefined, // size
+      undefined, // sort
+      opts.q || undefined,
+      undefined, // status
+      undefined, // unitId
+      opts.from || undefined,
+      opts.to || undefined,
+      opts.criticality || undefined,
+      undefined, // riskFamilyCode
+      opts.source || undefined,
+    );
   }
 
   /** Exceptions issues du contrôle continu (constats de source CCM), §5. */
