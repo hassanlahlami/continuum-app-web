@@ -6,6 +6,7 @@ import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter, map, startWith } from 'rxjs/operators';
 import { Me } from '../../libs/api-clients/me';
@@ -46,12 +47,14 @@ interface NavGroup {
     MatListModule,
     MatIconModule,
     MatButtonModule,
+    MatTooltipModule,
   ],
   template: `
-    <mat-sidenav-container class="shell">
+    <mat-sidenav-container class="shell" [autosize]="true">
       <mat-sidenav
         #drawer
         class="shell-nav"
+        [class.collapsed]="collapsed() && !isHandset()"
         data-cy="app-sidenav"
         [mode]="isHandset() ? 'over' : 'side'"
         [opened]="!isHandset()"
@@ -72,6 +75,8 @@ interface NavGroup {
                 routerLinkActive="active-nav"
                 [routerLinkActiveOptions]="{ exact: !!item.exact }"
                 [attr.data-cy]="'nav-' + item.route"
+                [matTooltip]="collapsed() && !isHandset() ? item.label : ''"
+                matTooltipPosition="right"
                 (click)="isHandset() && drawer.close()"
               >
                 <mat-icon matListItemIcon aria-hidden="true">{{ item.icon }}</mat-icon>
@@ -84,11 +89,10 @@ interface NavGroup {
 
       <mat-sidenav-content class="shell-content">
         <mat-toolbar class="app-bar">
-          @if (isHandset()) {
-            <button mat-icon-button aria-label="Menu" (click)="drawer.toggle()" data-cy="nav-toggle">
-              <mat-icon>menu</mat-icon>
-            </button>
-          }
+          <button mat-icon-button aria-label="Réduire ou déployer la navigation"
+                  (click)="toggleNav(drawer)" data-cy="nav-toggle">
+            <mat-icon>menu</mat-icon>
+          </button>
           <nav class="breadcrumb" aria-label="Fil d'Ariane" data-cy="breadcrumb">
             @for (c of crumbs(); track $index; let last = $last, first = $first) {
               @if (!first) { <mat-icon class="crumb-sep" aria-hidden="true">chevron_right</mat-icon> }
@@ -129,7 +133,15 @@ interface NavGroup {
         width: 264px;
         border-right: 1px solid var(--ct-color-border);
         background: var(--ct-color-surface);
+        overflow-x: hidden;
+        transition: width 0.16s ease;
       }
+      /* Rail replié (bureau) : icônes seules, libellés masqués. */
+      .shell-nav.collapsed { width: 68px; }
+      .shell-nav.collapsed .brand span,
+      .shell-nav.collapsed [matListItemTitle],
+      .shell-nav.collapsed h3[matSubheader] { display: none; }
+      .shell-nav.collapsed .brand { justify-content: center; padding: 0; }
       .brand {
         display: flex; align-items: center; gap: var(--ct-space-2);
         height: var(--ct-appbar-height); padding: 0 var(--ct-space-4);
@@ -158,7 +170,8 @@ interface NavGroup {
       .user { display: flex; flex-direction: column; line-height: 1.15; text-align: right; }
       .user strong { font-size: .9rem; }
       .user span { font-size: .78rem; color: var(--ct-color-muted); }
-      .content { padding: var(--ct-space-5); max-width: 1180px; margin: 0 auto; }
+      /* Le contenu occupe toute la largeur restante à droite de la barre latérale. */
+      .content { padding: var(--ct-space-5); width: 100%; }
       .api-error {
         display: flex; align-items: center; gap: var(--ct-space-2);
         margin: var(--ct-space-3) var(--ct-space-5) 0;
@@ -180,6 +193,8 @@ export class AppComponent implements OnInit {
   readonly me = signal<Me | null>(null);
   /** Préférence de thème : auto (système), clair ou sombre ; persistée par navigateur. */
   readonly theme = signal<'auto' | 'light' | 'dark'>(this.readTheme());
+  /** Barre latérale repliée en rail d'icônes (bureau) ; persistée par navigateur. */
+  readonly collapsed = signal<boolean>(this.readCollapsed());
   readonly isHandset = toSignal(
     inject(BreakpointObserver)
       .observe([Breakpoints.Handset, Breakpoints.TabletPortrait])
@@ -227,6 +242,29 @@ export class AppComponent implements OnInit {
     // mat-icon rend les icônes « Material Symbols Outlined » (police auto-hébergée, D26).
     inject(MatIconRegistry).setDefaultFontSetClass('material-symbols-outlined');
     this.applyTheme();
+  }
+
+  /** Mobile : ouvre/ferme le tiroir. Bureau : replie/déploie le rail (persisté). */
+  toggleNav(drawer: { toggle: () => void }): void {
+    if (this.isHandset()) {
+      drawer.toggle();
+      return;
+    }
+    const next = !this.collapsed();
+    this.collapsed.set(next);
+    try {
+      localStorage.setItem('ct-nav-collapsed', String(next));
+    } catch {
+      // stockage indisponible : la préférence reste pour la session.
+    }
+  }
+
+  private readCollapsed(): boolean {
+    try {
+      return localStorage.getItem('ct-nav-collapsed') === 'true';
+    } catch {
+      return false;
+    }
   }
 
   /** Bascule la préférence de thème : auto → clair → sombre → auto. */

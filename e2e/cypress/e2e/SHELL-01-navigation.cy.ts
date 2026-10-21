@@ -33,6 +33,15 @@ describe('SHELL-01 — Coquille & navigation', () => {
     cy.get('[data-cy=breadcrumb]').should('contain', 'Contrôle continu').and('contain', "Vue d'ensemble");
   });
 
+  it('replie et déploie la barre latérale (rail dynamique)', () => {
+    cy.visit('/');
+    cy.get('[data-cy=app-sidenav]').should('not.have.class', 'collapsed');
+    cy.get('[data-cy=nav-toggle]').click();
+    cy.get('[data-cy=app-sidenav]').should('have.class', 'collapsed');
+    cy.get('[data-cy=nav-toggle]').click();
+    cy.get('[data-cy=app-sidenav]').should('not.have.class', 'collapsed');
+  });
+
   it('bascule le thème (clair / sombre)', () => {
     cy.visit('/');
     cy.get('[data-cy=theme-toggle]').click(); // auto -> clair
