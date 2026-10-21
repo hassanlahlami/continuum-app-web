@@ -13,6 +13,7 @@ import { Me } from '../../libs/api-clients/me';
 import { ApiErrorStore } from './errors/api-error.store';
 import { MeFacade } from './me.facade';
 import { PermissionsStore } from './permissions.store';
+import { ThemeService } from './theme.service';
 
 /** Un lien de navigation ; {@code feature} le masque si l'utilisateur ne détient pas ce droit (§2.1.7). */
 interface NavItem {
@@ -105,10 +106,10 @@ interface NavGroup {
             <mat-icon>{{ themeIcon() }}</mat-icon>
           </button>
           @if (me(); as user) {
-            <div class="user" data-cy="app-user">
+            <a class="user" routerLink="/profile" data-cy="app-user" matTooltip="Profil & préférences" matTooltipPosition="below">
               <strong>{{ user.user.displayName }}</strong>
               <span>{{ user.entity.label }}</span>
-            </div>
+            </a>
           }
         </mat-toolbar>
 
@@ -167,7 +168,12 @@ interface NavGroup {
       .breadcrumb .current { color: var(--ct-color-text); font-weight: 600; }
       .breadcrumb .crumb-sep { font-size: 18px; width: 18px; height: 18px; color: var(--ct-color-muted); }
       .spacer { flex: 1 1 auto; }
-      .user { display: flex; flex-direction: column; line-height: 1.15; text-align: right; }
+      .user {
+        display: flex; flex-direction: column; line-height: 1.15; text-align: right;
+        text-decoration: none; color: inherit; cursor: pointer;
+        padding: var(--ct-space-1) var(--ct-space-2); border-radius: var(--ct-radius-sm);
+      }
+      .user:hover { background: var(--ct-color-primary-soft); }
       .user strong { font-size: .9rem; }
       .user span { font-size: .78rem; color: var(--ct-color-muted); }
       /* Le contenu occupe toute la largeur restante à droite de la barre latérale. */
@@ -190,9 +196,10 @@ export class AppComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
+  private readonly themeSvc = inject(ThemeService);
   readonly me = signal<Me | null>(null);
-  /** Préférence de thème : auto (système), clair ou sombre ; persistée par navigateur. */
-  readonly theme = signal<'auto' | 'light' | 'dark'>(this.readTheme());
+  /** Préférence de thème (service partagé avec la page Profil). */
+  readonly theme = this.themeSvc.theme;
   /** Barre latérale repliée en rail d'icônes (bureau) ; persistée par navigateur. */
   readonly collapsed = signal<boolean>(this.readCollapsed());
   readonly isHandset = toSignal(
@@ -228,6 +235,7 @@ export class AppComponent implements OnInit {
         { label: 'Bibliothèque', icon: 'checklist', route: '/ccm/controls', feature: 'ccm.read' },
       ],
     },
+    { items: [{ label: 'Profil', icon: 'account_circle', route: '/profile' }] },
   ];
 
   /** Groupes dont au moins un lien est visible pour l'utilisateur courant. */
@@ -241,7 +249,6 @@ export class AppComponent implements OnInit {
   constructor() {
     // mat-icon rend les icônes « Material Symbols Outlined » (police auto-hébergée, D26).
     inject(MatIconRegistry).setDefaultFontSetClass('material-symbols-outlined');
-    this.applyTheme();
   }
 
   /** Mobile : ouvre/ferme le tiroir. Bureau : replie/déploie le rail (persisté). */
@@ -269,37 +276,11 @@ export class AppComponent implements OnInit {
 
   /** Bascule la préférence de thème : auto → clair → sombre → auto. */
   cycleTheme(): void {
-    const next = this.theme() === 'auto' ? 'light' : this.theme() === 'light' ? 'dark' : 'auto';
-    this.theme.set(next);
-    try {
-      localStorage.setItem('ct-theme', next);
-    } catch {
-      // stockage indisponible (navigation privée) : la préférence reste pour la session.
-    }
-    this.applyTheme();
+    this.themeSvc.cycle();
   }
 
   themeIcon(): string {
-    return this.theme() === 'light' ? 'light_mode' : this.theme() === 'dark' ? 'dark_mode' : 'brightness_auto';
-  }
-
-  private readTheme(): 'auto' | 'light' | 'dark' {
-    try {
-      const v = localStorage.getItem('ct-theme');
-      return v === 'light' || v === 'dark' ? v : 'auto';
-    } catch {
-      return 'auto';
-    }
-  }
-
-  /** Applique la préférence : `data-theme` explicite, ou retiré pour suivre le système (auto). */
-  private applyTheme(): void {
-    const el = document.documentElement;
-    if (this.theme() === 'auto') {
-      delete el.dataset.theme;
-    } else {
-      el.dataset.theme = this.theme();
-    }
+    return this.themeSvc.icon();
   }
 
   ngOnInit(): void {

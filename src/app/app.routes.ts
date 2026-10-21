@@ -10,6 +10,7 @@ import { FindingsPage } from './pages/findings.page';
 import { MissionDetailPage } from './pages/mission-detail.page';
 import { MissionsPage } from './pages/missions.page';
 import { MyPermissionsPage } from './pages/my-permissions.page';
+import { ProfilePage } from './pages/profile.page';
 
 /**
  * Routes de la Plateforme Fonctionnelle. Les gardes `canMatch` reflètent les droits (§2.1.7) ;
@@ -17,6 +18,7 @@ import { MyPermissionsPage } from './pages/my-permissions.page';
  */
 export const routes: Routes = [
   { path: '', pathMatch: 'full', component: MyPermissionsPage, data: { crumb: ['Accueil'] } },
+  { path: 'profile', component: ProfilePage, data: { crumb: ['Profil & préférences'] } },
   { path: 'missions', canMatch: [requireFeature('mission.read')], component: MissionsPage, data: { crumb: ['Missions'] } },
   {
     path: 'missions/:id',
