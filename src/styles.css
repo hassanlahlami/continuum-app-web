@@ -55,6 +55,10 @@
   --ct-radius-pill: 999px;
   --ct-shadow-sm: 0 1px 2px rgba(16, 32, 48, 0.06), 0 1px 3px rgba(16, 32, 48, 0.08);
   --ct-shadow-md: 0 2px 8px rgba(16, 32, 48, 0.08), 0 8px 24px rgba(16, 32, 48, 0.06);
+  --ct-shadow-lg: 0 4px 16px rgba(16, 32, 48, 0.10), 0 16px 40px rgba(16, 32, 48, 0.08);
+  /* Anneau de focus clavier (a11y + rendu moderne), dérivé de la primaire du tenant. */
+  --ct-focus-ring: 0 0 0 3px color-mix(in srgb, var(--ct-color-primary) 38%, transparent);
+  --ct-transition: 0.15s ease;
 
   /* — Composants — */
   --ct-appbar-height: 56px;
@@ -78,6 +82,29 @@ body {
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+/* ———————————————————————————— Accessibilité & mouvement (modernisation) ————————————————————————————
+ * Anneau de focus clavier cohérent sur les éléments interactifs natifs (liens, boutons, éléments
+ * focusables) — les composants Material conservent leur propre indicateur. `:focus-visible` n'apparaît
+ * qu'au clavier, pas au clic souris. Respect de `prefers-reduced-motion` (bonne pratique moderne).
+ */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible,
+[routerLink]:focus-visible {
+  outline: none;
+  box-shadow: var(--ct-focus-ring);
+  border-radius: var(--ct-radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* ———————————————————————————— Barre d'application ———————————————————————————— */
