@@ -1,9 +1,10 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTableModule } from '@angular/material/table';
 import { CcmExceptionPage } from '../../../libs/api-clients/ccm';
 import { CcmFacade } from '../ccm.facade';
@@ -16,7 +17,7 @@ import { CcmFacade } from '../ccm.facade';
 @Component({
   selector: 'ct-ccm-exceptions',
   standalone: true,
-  imports: [RouterLink, MatCardModule, MatTableModule, MatChipsModule, MatButtonModule, MatProgressBarModule],
+  imports: [RouterLink, MatCardModule, MatTableModule, MatChipsModule, MatButtonModule, MatSlideToggleModule, MatProgressBarModule],
   template: `
     <section>
       <header class="page-head">
@@ -27,6 +28,10 @@ import { CcmFacade } from '../ccm.facade';
         </span>
       </header>
       <p class="page-sub">Exceptions détectées par le contrôle continu, à trier par un auditeur habilité.</p>
+
+      <mat-slide-toggle class="filter-mine" [checked]="mine()" (change)="applyMine($event.checked)" data-cy="ccm-mine">
+        Qui me sont affectées
+      </mat-slide-toggle>
 
       @if (page(); as p) {
         @if (p.items.length) {
@@ -74,6 +79,7 @@ import { CcmFacade } from '../ccm.facade';
       .page-head { display: flex; align-items: center; justify-content: space-between; gap: var(--ct-space-4); flex-wrap: wrap; }
       .head-actions { display: flex; gap: var(--ct-space-2); }
       .page-sub { color: var(--ct-color-muted); margin-top: 0; }
+      .filter-mine { display: inline-block; margin-bottom: var(--ct-space-3); }
       .table-card { padding: 0; overflow: hidden; }
       table[mat-table] { width: 100%; background: transparent; }
       th.mat-mdc-header-cell { background: var(--ct-color-surface); }
@@ -85,12 +91,28 @@ import { CcmFacade } from '../ccm.facade';
 })
 export class CcmExceptionsPage implements OnInit {
   private readonly facade = inject(CcmFacade);
+  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   readonly page = signal<CcmExceptionPage | null>(null);
+  readonly mine = signal(false);
   readonly columns = ['control', 'summary', 'criticality', 'status'];
 
   ngOnInit(): void {
-    this.facade.listExceptions().subscribe((p) => this.page.set(p));
+    this.route.queryParamMap.subscribe((params) => {
+      const assignedToMe = params.get('assignedToMe') === 'true';
+      this.mine.set(assignedToMe);
+      this.page.set(null);
+      this.facade.listExceptions({ assignedToMe: assignedToMe || undefined }).subscribe((p) => this.page.set(p));
+    });
+  }
+
+  /** Bascule le filtre « qui me sont affectées » (reflété dans l'URL). */
+  applyMine(checked: boolean): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { assignedToMe: checked || null },
+      queryParamsHandling: 'merge',
+    });
   }
 
   /** Ouvre le détail de l'exception (ligne entière cliquable). */
