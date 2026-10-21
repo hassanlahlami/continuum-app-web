@@ -1,23 +1,57 @@
 import { http, HttpResponse } from 'msw';
 import type { Finding, FindingPage } from '../api-clients/findings';
 
-/** Mocks MSW du module « constats » (front-first, GUIDE §6) — fixture typée par le client généré. */
+/** Mocks MSW du module « constats » (front-first, GUIDE §6) — fixtures typées par le client généré. */
+const ALL_FINDINGS: Finding[] = [
+  {
+    id: 'c1a2b3d4-0000-0000-0000-000000000001',
+    reference: 'FND-2026-INSP-014-001',
+    title: 'Écriture au-dessus du seuil sans double validation',
+    status: { code: 'VALIDATED', label: 'Validé' },
+    criticality: { code: 'HIGH', label: 'Élevée' },
+    source: 'MANUAL',
+    missionId: '9b2d7e4a-1c3f-4a6b-8d5e-7f0a1b2c3d4e',
+    missionTitle: 'Inspection agence A001',
+    meta: { createdAt: '2026-01-10T10:00:00Z', version: 2 },
+  },
+  {
+    id: 'c1a2b3d4-0000-0000-0000-000000000002',
+    reference: 'FND-2026-INSP-014-002',
+    title: 'Compte dormant avec mouvement récent non justifié',
+    status: { code: 'OUVERT', label: 'Ouvert' },
+    criticality: { code: 'MEDIUM', label: 'Moyenne' },
+    source: 'CCM',
+    missionTitle: 'Inspection agence A001',
+    meta: { createdAt: '2026-01-12T09:00:00Z', version: 1 },
+  },
+  {
+    id: 'c1a2b3d4-0000-0000-0000-000000000003',
+    reference: 'FND-2026-AUD-009-001',
+    title: 'Procédure de clôture mensuelle incomplète',
+    status: { code: 'OUVERT', label: 'Ouvert' },
+    criticality: { code: 'LOW', label: 'Faible' },
+    source: 'MANUAL',
+    missionTitle: 'Audit processus crédits',
+    meta: { createdAt: '2026-01-15T14:00:00Z', version: 1 },
+  },
+  {
+    id: 'c1a2b3d4-0000-0000-0000-000000000004',
+    reference: 'FND-2026-CCM-0003',
+    title: 'Cumul saisie / validation des virements',
+    status: { code: 'RETENU', label: 'Retenu' },
+    criticality: { code: 'HIGH', label: 'Élevée' },
+    source: 'CCM',
+    missionTitle: 'Contrôle continu',
+    meta: { createdAt: '2026-01-18T08:30:00Z', version: 1 },
+  },
+];
+
 export const findingsPageFixture: FindingPage = {
   page: 0,
   size: 20,
-  totalItems: 1,
+  totalItems: ALL_FINDINGS.length,
   totalPages: 1,
-  items: [
-    {
-      id: 'c1a2b3d4-0000-0000-0000-000000000001',
-      reference: 'FND-2026-INSP-014-001',
-      title: 'Écriture au-dessus du seuil sans double validation',
-      status: { code: 'VALIDATED', label: 'Validé' },
-      criticality: { code: 'HIGH', label: 'Élevée' },
-      missionTitle: 'Inspection agence A001',
-      meta: { createdAt: '2026-01-10T10:00:00Z', version: 2 },
-    },
-  ],
+  items: ALL_FINDINGS,
 };
 
 /**
@@ -54,7 +88,19 @@ function validatedFinding(missionId: string, findingId: string): Finding {
 }
 
 export const findingsHandlers = [
-  http.get('*/api/app/findings', () => HttpResponse.json(findingsPageFixture)),
+  http.get('*/api/app/findings', ({ request }) => {
+    const url = new URL(request.url);
+    const q = url.searchParams.get('q')?.toLowerCase();
+    const source = url.searchParams.get('source');
+    const criticality = url.searchParams.get('criticality');
+    const items = ALL_FINDINGS.filter(
+      (f) =>
+        (!q || `${f.reference} ${f.title}`.toLowerCase().includes(q)) &&
+        (!source || f.source === source) &&
+        (!criticality || f.criticality?.code === criticality),
+    );
+    return HttpResponse.json({ page: 0, size: 20, totalItems: items.length, totalPages: 1, items });
+  }),
 
   // Constats d'une mission (cockpit) : un constat ouvert, visible dans le périmètre de démo.
   http.get('*/api/app/missions/:missionId/findings', ({ params }) =>
