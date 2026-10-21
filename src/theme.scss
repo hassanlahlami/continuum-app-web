@@ -15,7 +15,7 @@ html {
       tertiary: mat.$blue-palette,
     ),
     typography: Roboto,
-    density: 0,
+    density: -1, // « épuré & dense » : composants plus compacts (inputs, tables, boutons, chips)
   ));
 
   // — Pont : variables système Material -> tokens sémantiques Continuum —
