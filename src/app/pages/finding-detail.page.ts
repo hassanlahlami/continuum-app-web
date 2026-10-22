@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -16,7 +17,7 @@ import { FindingsFacade } from '../findings.facade';
 @Component({
   selector: 'ct-finding-detail',
   standalone: true,
-  imports: [RouterLink, MatCardModule, MatChipsModule, MatButtonModule, MatIconModule],
+  imports: [RouterLink, DatePipe, MatCardModule, MatChipsModule, MatButtonModule, MatIconModule],
   template: `
     <section>
       <a mat-button [routerLink]="['/missions', missionId]"><mat-icon>arrow_back</mat-icon> Mission</a>
@@ -31,8 +32,19 @@ import { FindingsFacade } from '../findings.facade';
           </mat-card-header>
           <mat-card-content>
             <mat-chip-set>
-              <mat-chip disableRipple data-cy="finding-status">{{ f.status.label }}</mat-chip>
+              <mat-chip disableRipple data-cy="finding-status" [attr.data-status]="f.status.code">{{ f.status.label }}</mat-chip>
+              @if (f.criticality; as c) {
+                <mat-chip disableRipple [attr.data-criticality]="c.code">{{ c.label }}</mat-chip>
+              }
             </mat-chip-set>
+            <dl class="info">
+              @if (f.author; as a) {
+                <dt>Auteur</dt>
+                <dd>{{ a.displayName }}@if (a.positionLabel) { <span class="muted"> · {{ a.positionLabel }}</span> }</dd>
+              }
+              @if (f.riskFamilyCode) { <dt>Famille de risque</dt><dd><code>{{ f.riskFamilyCode }}</code></dd> }
+              <dt>Source</dt><dd>{{ f.source === 'CCM' ? 'Contrôle continu' : 'Manuel' }}</dd>
+            </dl>
             <dl class="frap">
               <dt>Fait</dt><dd>{{ f.fact || '—' }}</dd>
               <dt>Critère</dt><dd>{{ f.criterion || '—' }}</dd>
@@ -57,6 +69,49 @@ import { FindingsFacade } from '../findings.facade';
             </mat-card-actions>
           }
         </mat-card>
+
+        @if (f.evidences?.length) {
+          <mat-card appearance="outlined" class="block" data-cy="finding-evidences">
+            <mat-card-header><mat-card-title>Preuves ({{ f.evidences?.length }})</mat-card-title></mat-card-header>
+            <mat-card-content>
+              <ul class="files">
+                @for (att of f.evidences; track att.id) {
+                  <li>
+                    <mat-icon aria-hidden="true">description</mat-icon>
+                    <span class="file-name">{{ att.fileName }}</span>
+                    @if (att.category; as cat) { <span class="badge">{{ cat.label }}</span> }
+                    <span class="muted">{{ fileSize(att.size) }} · {{ att.uploadedAt | date: 'dd/MM/yyyy' }}@if (att.uploadedBy; as u) { · {{ u.displayName }} }</span>
+                  </li>
+                }
+              </ul>
+            </mat-card-content>
+          </mat-card>
+        }
+
+        @if (f.reviewComments?.length) {
+          <mat-card appearance="outlined" class="block" data-cy="finding-reviews">
+            <mat-card-header><mat-card-title>Commentaires de revue</mat-card-title></mat-card-header>
+            <mat-card-content>
+              <ul class="reviews">
+                @for (rc of f.reviewComments; track $index) {
+                  <li>
+                    <div class="rc-head">
+                      <strong>{{ rc.author?.displayName ?? '—' }}</strong>
+                      @if (rc.field) { <span class="badge">{{ rc.field }}</span> }
+                      @if (rc.resolved) {
+                        <span class="badge ok">Résolu</span>
+                      } @else {
+                        <span class="badge todo">À traiter</span>
+                      }
+                      <span class="muted">{{ rc.at | date: 'dd/MM/yyyy HH:mm' }}</span>
+                    </div>
+                    <p>{{ rc.comment }}</p>
+                  </li>
+                }
+              </ul>
+            </mat-card-content>
+          </mat-card>
+        }
       } @else {
         <p>Chargement…</p>
       }
@@ -66,9 +121,23 @@ import { FindingsFacade } from '../findings.facade';
     `
       .block { margin-top: var(--ct-space-4); }
       code { font-family: var(--ct-font-mono); }
+      .info { display: grid; grid-template-columns: max-content 1fr; gap: var(--ct-space-1) var(--ct-space-4); margin: 0 0 var(--ct-space-3); }
+      .info dt { color: var(--ct-color-muted); } .info dd { margin: 0; font-weight: 600; }
+      .muted { color: var(--ct-color-muted); font-weight: 400; }
       .frap { display: grid; grid-template-columns: max-content 1fr; gap: var(--ct-space-2) var(--ct-space-4); margin: var(--ct-space-3) 0 0; }
-      .frap dt { color: var(--ct-color-muted); font-weight: 600; } .frap dd { margin: 0; }
+      .frap dt { color: var(--ct-color-muted); font-weight: 600; } .frap dd { margin: 0; max-width: 80ch; }
       .error { color: var(--ct-red-700); }
+      .files { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--ct-space-2); }
+      .files li { display: flex; align-items: center; gap: var(--ct-space-2); flex-wrap: wrap; }
+      .files mat-icon { color: var(--ct-color-muted); font-size: 20px; height: 20px; width: 20px; }
+      .file-name { font-weight: 600; }
+      .reviews { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--ct-space-3); }
+      .reviews li { border-left: 2px solid var(--ct-color-border); padding-left: var(--ct-space-3); }
+      .reviews p { margin: var(--ct-space-1) 0 0; max-width: 80ch; }
+      .rc-head { display: flex; align-items: center; gap: var(--ct-space-2); flex-wrap: wrap; }
+      .badge { font-size: 0.72rem; padding: 1px 8px; border-radius: var(--ct-radius-pill); background: var(--ct-color-surface-alt); color: var(--ct-color-muted); }
+      .badge.ok { background: var(--ct-green-50); color: var(--ct-green-600); }
+      .badge.todo { background: var(--ct-amber-50); color: var(--ct-amber-700); }
     `,
   ],
 })
@@ -102,6 +171,20 @@ export class FindingDetailPage implements OnInit {
         this.busy.set(false);
       },
     });
+  }
+
+  /** Taille de fichier lisible (o / Ko / Mo). */
+  fileSize(bytes?: number): string {
+    if (bytes == null) {
+      return '—';
+    }
+    if (bytes < 1024) {
+      return `${bytes} o`;
+    }
+    if (bytes < 1024 * 1024) {
+      return `${Math.round(bytes / 1024)} Ko`;
+    }
+    return `${(bytes / 1024 / 1024).toFixed(1)} Mo`;
   }
 
   private messageFor(err: HttpErrorResponse): string {

@@ -65,12 +65,41 @@ function openFinding(missionId: string, findingId: string): Finding {
     title: 'Écriture au-dessus du seuil sans double validation',
     status: { code: 'OUVERT', label: 'Ouvert' },
     criticality: { code: 'HIGH', label: 'Élevée' },
+    source: 'MANUAL',
+    riskFamilyCode: 'FRAUDE_INTERNE',
     missionId,
     missionTitle: 'Inspection agence A001',
+    author: { id: '00000000-0000-0000-0000-0000000000f1', displayName: 'Inès Gendron', positionLabel: 'Chef de mission' },
     fact: "U003 a saisi et validé 3 virements au-dessus du seuil le même jour.",
     criterion: 'Double validation obligatoire au-delà du seuil (procédure interne).',
     cause: "Cumul des habilitations saisie + validation sur le même périmètre.",
     consequence: "Risque de virement frauduleux non détecté.",
+    evidences: [
+      {
+        id: 'att-0001', fileName: 'extrait-mouvements-A001.pdf', mediaType: 'application/pdf',
+        size: 184320, sha256: '9f86d081884c7d659a2feaa0c55ad015', uploadedAt: '2026-01-10T11:00:00Z',
+        uploadedBy: { id: '00000000-0000-0000-0000-0000000000f1', displayName: 'Inès Gendron' },
+        category: { code: 'EVIDENCE', label: 'Pièce justificative' },
+      },
+      {
+        id: 'att-0002', fileName: 'journal-habilitations.xlsx',
+        mediaType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        size: 45678, sha256: '2c26b46b68ffc68ff99b453c1d304134', uploadedAt: '2026-01-10T11:05:00Z',
+        category: { code: 'EXPORT', label: 'Export' },
+      },
+    ],
+    reviewComments: [
+      {
+        field: 'criterion', comment: "Préciser la référence exacte de la procédure interne.",
+        author: { id: '00000000-0000-0000-0000-0000000000f2', displayName: 'Omar Haddad' },
+        at: '2026-01-11T09:00:00Z', resolved: false,
+      },
+      {
+        field: 'fact', comment: 'Fait confirmé par échantillon de 12 opérations.',
+        author: { id: '00000000-0000-0000-0000-0000000000f2', displayName: 'Omar Haddad' },
+        at: '2026-01-11T09:05:00Z', resolved: true,
+      },
+    ],
     availableActions: [{ code: 'validate', label: 'Valider', style: 'primary' }],
     meta: { createdAt: '2026-01-10T10:00:00Z', version: 1 },
   };
