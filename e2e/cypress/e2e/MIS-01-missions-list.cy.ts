@@ -9,6 +9,11 @@ describe('MIS-01 — Missions (liste)', () => {
     cy.get('[data-cy=missions-table]').should('exist');
     cy.get('[data-cy=mission-row]').should('have.length', 3);
     cy.get('[data-cy=missions-table]').should('contain', 'MIS-2026-INSP-014').and('contain', 'En cours');
+    // colonnes enrichies : type, responsable, nb de constats
+    cy.get('[data-cy=missions-table]')
+      .should('contain', 'Inspection')
+      .and('contain', 'Inès Gendron')
+      .and('contain', 'Responsable');
   });
 
   it('ouvre la fiche mission en cliquant une ligne (→ MIS-03)', () => {
