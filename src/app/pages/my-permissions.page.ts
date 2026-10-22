@@ -5,13 +5,16 @@ import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { CcmOverview } from '../../../libs/api-clients/ccm';
+import { Me } from '../../../libs/api-clients/me';
 import { CcmFacade } from '../ccm.facade';
+import { MeFacade } from '../me.facade';
 import { HasFeatureDirective } from '../directives/has-feature.directive';
 import { PermissionsStore } from '../permissions.store';
 
 /**
- * Accueil — tableau de bord (§1.5/§8) : raccourcis par droit, instantané du contrôle continu (si
- * {@code ccm.read}) et fonctionnalités effectives (`/me/permissions`, §2.1.7). Composants Material (--ct-*).
+ * Accueil — tableau de bord (§1.5/§8) : bandeau d'accueil (identité `/me`), raccourcis par droit,
+ * instantané du contrôle continu (si {@code ccm.read}) et fonctionnalités effectives
+ * (`/me/permissions`, §2.1.7). Composants Material (--ct-*).
  */
 @Component({
   selector: 'ct-my-permissions',
@@ -19,7 +22,19 @@ import { PermissionsStore } from '../permissions.store';
   imports: [RouterLink, HasFeatureDirective, MatCardModule, MatChipsModule, MatButtonModule, MatIconModule],
   template: `
     <section>
-      <h1>Mes droits</h1>
+      @if (me(); as m) {
+        <header class="hero" data-cy="home-hero">
+          <h1 data-cy="home-greeting">Bonjour, {{ m.user.displayName }}</h1>
+          <p class="hero-meta">
+            @if (m.user.positionLabel) { <span>{{ m.user.positionLabel }}</span> }
+            <span>{{ m.entity.label }}</span>
+            @if (homeUnit(m); as unit) { <span>{{ unit }}</span> }
+          </p>
+        </header>
+      } @else {
+        <h1>Accueil</h1>
+      }
+
       <nav class="quick-nav" data-cy="home-nav">
         <a mat-stroked-button routerLink="/missions" *hasFeature="'mission.read'">
           <mat-icon>folder_open</mat-icon> Missions
@@ -54,6 +69,7 @@ import { PermissionsStore } from '../permissions.store';
         </div>
       }
 
+      <h2 class="section-title">Mes droits</h2>
       @if (store.permissions(); as p) {
         <mat-card appearance="outlined" class="block">
           <mat-card-header>
@@ -84,6 +100,10 @@ import { PermissionsStore } from '../permissions.store';
   `,
   styles: [
     `
+      .hero { margin-bottom: var(--ct-space-4); }
+      .hero h1 { margin: 0; }
+      .hero-meta { display: flex; flex-wrap: wrap; gap: var(--ct-space-1) var(--ct-space-2); margin: var(--ct-space-1) 0 0; color: var(--ct-color-muted); }
+      .hero-meta span:not(:last-child)::after { content: '·'; margin-left: var(--ct-space-2); color: var(--ct-color-border); }
       .quick-nav { display: flex; flex-wrap: wrap; gap: var(--ct-space-2); margin-bottom: var(--ct-space-4); }
       .section-title { font-size: 1rem; color: var(--ct-color-muted); margin: var(--ct-space-4) 0 var(--ct-space-2); }
       .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--ct-space-3); margin-bottom: var(--ct-space-4); }
@@ -102,13 +122,21 @@ import { PermissionsStore } from '../permissions.store';
 export class MyPermissionsPage implements OnInit {
   protected readonly store = inject(PermissionsStore);
   private readonly ccm = inject(CcmFacade);
+  private readonly meFacade = inject(MeFacade);
   readonly overview = signal<CcmOverview | null>(null);
+  readonly me = signal<Me | null>(null);
 
   ngOnInit(): void {
+    this.meFacade.currentUser().subscribe((m) => this.me.set(m));
     this.store.ensureLoaded().subscribe(() => {
       if (this.store.has('ccm.read')) {
         this.ccm.getOverview().subscribe((o) => this.overview.set(o));
       }
     });
+  }
+
+  /** Unité de rattachement principale (première affectation « titulaire »), pour le bandeau d'accueil. */
+  homeUnit(m: Me): string | null {
+    return m.assignments?.find((a) => a.kind === 'HOLDER')?.unit?.label ?? m.assignments?.[0]?.unit?.label ?? null;
   }
 }
