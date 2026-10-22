@@ -12,6 +12,16 @@ describe('MIS-03 — Fiche mission (cockpit)', () => {
     cy.get('[data-cy=mission-findings] [data-cy=finding-row]').should('have.length.at.least', 1);
   });
 
+  it('affiche le cadrage enrichi (indicateurs, responsable, périmètre, entités)', () => {
+    cy.visit(`/missions/${mission}`);
+    cy.get('[data-cy=mission-kpis]').should('contain', 'Avancement').and('contain', 'Tâches en retard');
+    cy.get('[data-cy=mission-overdue]').should('contain', '2');
+    cy.contains('Responsable').should('exist');
+    cy.contains('Inès Gendron').should('exist');
+    cy.get('[data-cy=mission-scope]').should('contain', 'Périmètre');
+    cy.get('[data-cy=mission-entities]').should('contain', 'Agence A001');
+  });
+
   it('navigue vers le détail FRAP d\'un constat (→ FND-03)', () => {
     cy.visit(`/missions/${mission}`);
     cy.get('[data-cy=finding-link]').first().click();

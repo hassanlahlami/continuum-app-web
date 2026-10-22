@@ -10,7 +10,19 @@ export const missionFixture: Mission = {
   status: { code: 'IN_PROGRESS', label: 'En cours' },
   phase: { code: 'REALISATION', label: 'Réalisation' },
   unit: { id: '3f6c2a1e-8b7d-4c21-9a55-0e2f4b6d8c10', label: 'Inspection Générale' },
+  lead: { id: '00000000-0000-0000-0000-0000000000f1', displayName: 'Inès Gendron', positionLabel: 'Chef de mission' },
+  scope:
+    "Revue des opérations de l'agence A001 : octroi de crédit, tenue de caisse, séparation des tâches " +
+    'saisie/validation des virements, et conformité à la circulaire de contrôle interne.',
+  plannedStart: '2026-01-06T00:00:00Z',
+  plannedEnd: '2026-02-28T00:00:00Z',
   progressPercent: 40,
+  findingsCount: 1,
+  overdueTasksCount: 2,
+  auditedEntities: [
+    { id: 'ae-0001', label: 'Agence A001 — Casablanca Centre' },
+    { id: 'ae-0002', label: 'Back-office crédits' },
+  ],
   meta: { createdAt: '2026-01-05T09:00:00Z', version: 3 },
 };
 
