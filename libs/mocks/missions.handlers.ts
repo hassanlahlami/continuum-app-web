@@ -36,7 +36,9 @@ const ALL_MISSIONS: Mission[] = [
     status: { code: 'PLANNED', label: 'Planifiée' },
     phase: { code: 'PREPARATION', label: 'Préparation' },
     unit: { id: '3f6c2a1e-8b7d-4c21-9a55-0e2f4b6d8c10', label: 'Inspection Générale' },
+    lead: { id: '00000000-0000-0000-0000-0000000000f2', displayName: 'Omar Haddad', positionLabel: 'Inspecteur' },
     progressPercent: 5,
+    findingsCount: 0,
     meta: { createdAt: '2026-01-20T09:00:00Z', version: 1 },
   },
   {
@@ -47,7 +49,9 @@ const ALL_MISSIONS: Mission[] = [
     status: { code: 'CLOSED', label: 'Clôturée' },
     phase: { code: 'CLOTURE', label: 'Clôture' },
     unit: { id: '3f6c2a1e-8b7d-4c21-9a55-0e2f4b6d8c10', label: 'Inspection Générale' },
+    lead: { id: '00000000-0000-0000-0000-0000000000f3', displayName: 'Salma Benali', positionLabel: 'Chef de mission' },
     progressPercent: 100,
+    findingsCount: 5,
     meta: { createdAt: '2025-11-02T09:00:00Z', version: 7 },
   },
 ];

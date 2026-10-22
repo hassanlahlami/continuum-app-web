@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -23,6 +24,7 @@ import { MissionsFacade } from '../missions.facade';
     RouterLink,
     MatCardModule,
     MatTableModule,
+    MatChipsModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
@@ -72,13 +74,32 @@ import { MissionsFacade } from '../missions.facade';
                 <th mat-header-cell *matHeaderCellDef>Titre</th>
                 <td mat-cell *matCellDef="let m">{{ m.title }}</td>
               </ng-container>
+              <ng-container matColumnDef="type">
+                <th mat-header-cell *matHeaderCellDef>Type</th>
+                <td mat-cell *matCellDef="let m"><span class="muted">{{ m.missionType.label }}</span></td>
+              </ng-container>
+              <ng-container matColumnDef="lead">
+                <th mat-header-cell *matHeaderCellDef>Responsable</th>
+                <td mat-cell *matCellDef="let m">{{ m.lead?.displayName ?? '—' }}</td>
+              </ng-container>
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef>Statut</th>
-                <td mat-cell *matCellDef="let m">{{ m.status.label }}</td>
+                <td mat-cell *matCellDef="let m">
+                  <mat-chip-set><mat-chip disableRipple [attr.data-status]="m.status.code">{{ m.status.label }}</mat-chip></mat-chip-set>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="findings">
+                <th mat-header-cell *matHeaderCellDef class="num">Constats</th>
+                <td mat-cell *matCellDef="let m" class="num">{{ m.findingsCount ?? 0 }}</td>
               </ng-container>
               <ng-container matColumnDef="progress">
                 <th mat-header-cell *matHeaderCellDef>Avancement</th>
-                <td mat-cell *matCellDef="let m">{{ m.progressPercent ?? 0 }}%</td>
+                <td mat-cell *matCellDef="let m">
+                  <div class="progress-cell">
+                    <mat-progress-bar mode="determinate" [value]="m.progressPercent ?? 0" aria-label="Avancement"></mat-progress-bar>
+                    <span class="pct">{{ m.progressPercent ?? 0 }}%</span>
+                  </div>
+                </td>
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
               <tr mat-row *matRowDef="let row; columns: columns" data-cy="mission-row"
@@ -110,6 +131,12 @@ import { MissionsFacade } from '../missions.facade';
       tr.clickable { cursor: pointer; }
       tr.clickable:hover { background: var(--ct-color-primary-soft); }
       code { font-family: var(--ct-font-mono); }
+      .muted { color: var(--ct-color-muted); }
+      .num { text-align: right; }
+      td.num { font-variant-numeric: tabular-nums; }
+      .progress-cell { display: flex; align-items: center; gap: var(--ct-space-2); min-width: 130px; }
+      .progress-cell mat-progress-bar { flex: 1; }
+      .progress-cell .pct { color: var(--ct-color-muted); font-size: 0.82rem; font-variant-numeric: tabular-nums; min-width: 34px; text-align: right; }
       .pager { display: flex; align-items: center; gap: var(--ct-space-3); padding: var(--ct-space-3) var(--ct-space-4); }
       .pager span { color: var(--ct-color-muted); }
     `,
@@ -121,7 +148,7 @@ export class MissionsPage implements OnInit {
   private readonly router = inject(Router);
   readonly page = signal<MissionPage | null>(null);
   readonly filters = signal<{ q: string; from: string; to: string; mine: boolean }>({ q: '', from: '', to: '', mine: false });
-  readonly columns = ['reference', 'title', 'status', 'progress'];
+  readonly columns = ['reference', 'title', 'type', 'lead', 'status', 'findings', 'progress'];
 
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((params) => {
