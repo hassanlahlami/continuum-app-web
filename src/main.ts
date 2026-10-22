@@ -60,8 +60,14 @@ async function loadRuntimeConfig(): Promise<RuntimeConfig> {
  */
 async function startMocksInDev(): Promise<void> {
   if (!environment.production && environment.useMocks) {
-    const { worker } = await import('./mocks/browser');
-    await worker.start({ onUnhandledRequest: 'bypass' });
+    // Démarrage best-effort : un Service Worker MSW périmé ou en échec ne doit JAMAIS empêcher
+    // l'amorçage de l'application (sinon page blanche). On avertit et on continue sans mocks.
+    try {
+      const { worker } = await import('./mocks/browser');
+      await worker.start({ onUnhandledRequest: 'bypass' });
+    } catch (err) {
+      console.warn('[MSW] démarrage des mocks impossible — poursuite sans mocks.', err);
+    }
   }
 }
 
