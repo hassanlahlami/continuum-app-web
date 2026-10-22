@@ -20,6 +20,15 @@ describe('FND-03 — FRAP : revue et validation', () => {
     cy.get('[data-cy=finding-action-error]').should('not.exist');
   });
 
+  it('affiche le contenu enrichi (preuves et commentaires de revue)', () => {
+    cy.visit(`/missions/${mission}/findings/${openFinding}`);
+    cy.get('[data-cy=finding-evidences]').should('contain', 'extrait-mouvements-A001.pdf').and('contain', 'Ko');
+    cy.get('[data-cy=finding-reviews]')
+      .should('contain', 'Omar Haddad')
+      .and('contain', 'À traiter')
+      .and('contain', 'Résolu');
+  });
+
   it('montre un message clair quand la SoD dynamique bloque la validation (409)', () => {
     cy.visit(`/missions/${mission}/findings/${sodFinding}`);
     cy.get('[data-cy=finding-action-validate]').click();
