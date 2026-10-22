@@ -18,6 +18,18 @@ describe('CCM-02 — Triage d\'une exception CCM', () => {
     cy.get('[data-cy=ccm-convert-box]').should('be.visible');
   });
 
+  it('affiche le contenu enrichi (montant, source, enregistrements liés)', () => {
+    cy.visit(`/ccm/exceptions/${NEW_ID}`);
+    cy.get('[data-cy=ccm-exc-info]').should('contain', 'MAD').and('contain', 'Montant');
+    cy.get('[data-cy=ccm-source-record]').should('contain', 'accountId');
+    cy.get('[data-cy=ccm-related-records]').should('contain', 'EBANKING');
+  });
+
+  it('affiche l\'exception affectée (retenue) avec son responsable', () => {
+    cy.visit(`/ccm/exceptions/${RETAINED_ID}`);
+    cy.get('[data-cy=ccm-exc-info]').should('contain', 'Affectée à').and('contain', 'Inès Gendron');
+  });
+
   it('refuse d\'écarter sans justification (422)', () => {
     cy.visit(`/ccm/exceptions/${NEW_ID}`);
     cy.get('[data-cy=ccm-action-dismiss]').click();

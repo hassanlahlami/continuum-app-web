@@ -24,12 +24,18 @@ function baseException(id: string): CcmException {
     id,
     controlCode: 'SEUIL-HORAIRE',
     controlLabel: 'Écritures hors seuil / hors heures',
+    runId: 'run-2026-09-12-0730',
     status: { code: 'NEW', label: 'À trier' },
     criticality: { code: 'HIGH', label: 'Élevée', color: 'criticality-high' },
     summary: 'Écriture hors cadre (AMOUNT) : 2 500 000 MAD',
     detectedAt: '2026-09-12T08:30:00Z',
     unit: { id: 'b1111111-1111-1111-1111-111111111111', code: 'AG-A001', label: 'Agence A001' },
+    amount: { amount: '2500000.00', currency: 'MAD' },
     sourceRecord: { movementId: 4, accountId: 'A001000000002', amount: '2500000.00', channel: 'GUICHET' },
+    relatedRecords: [
+      { movementId: 5, accountId: 'A001000000002', amount: '1800000.00', channel: 'GUICHET' },
+      { movementId: 6, accountId: 'A001000000002', amount: '2100000.00', channel: 'EBANKING' },
+    ],
     availableActions: [RETAIN, DISMISS, ASSIGN],
   };
 }
@@ -39,7 +45,12 @@ const RETAINED_ID = 'ce000000-0000-0000-0000-0000000000e2';
 
 function exceptionFor(id: string): CcmException {
   if (id === RETAINED_ID) {
-    return { ...baseException(id), status: { code: 'RETAINED', label: 'Retenue' }, availableActions: [ASSIGN] };
+    return {
+      ...baseException(id),
+      status: { code: 'RETAINED', label: 'Retenue' },
+      assignee: { id: 'u2222222-2222-2222-2222-222222222222', displayName: 'Inès Gendron', positionLabel: 'Chef de mission' },
+      availableActions: [ASSIGN],
+    };
   }
   return baseException(id);
 }

@@ -39,17 +39,30 @@ import { CcmFacade } from '../ccm.facade';
             <mat-card-title data-cy="ccm-exc-summary">{{ e.summary || e.controlCode }}</mat-card-title>
             <mat-card-subtitle>
               <code>{{ e.controlCode }}</code>
-              @if (e.criticality; as c) { · Criticité : {{ c.label }} }
-              @if (e.unit; as u) { · Unité : {{ u.label }} }
+              @if (e.controlLabel) { · {{ e.controlLabel }} }
               · Détectée le {{ e.detectedAt | date: 'medium' }}
             </mat-card-subtitle>
           </mat-card-header>
           <mat-card-content>
             <mat-chip-set>
               <mat-chip disableRipple data-cy="ccm-exc-status">{{ e.status.label }}</mat-chip>
+              @if (e.criticality; as c) {
+                <mat-chip disableRipple [attr.data-criticality]="c.code">{{ c.label }}</mat-chip>
+              }
             </mat-chip-set>
 
+            <dl class="info" data-cy="ccm-exc-info">
+              @if (e.unit; as u) { <dt>Unité</dt><dd>{{ u.label }}</dd> }
+              @if (e.amount; as m) { <dt>Montant</dt><dd class="amount">{{ money(m) }}</dd> }
+              @if (e.assignee; as a) {
+                <dt>Affectée à</dt>
+                <dd>{{ a.displayName }}@if (a.positionLabel) { <span class="muted"> · {{ a.positionLabel }}</span> }</dd>
+              }
+              @if (e.runId) { <dt>Exécution</dt><dd><code>{{ e.runId }}</code></dd> }
+            </dl>
+
             @if (e.sourceRecord) {
+              <span class="meta-label">Enregistrement source (CBS)</span>
               <dl class="source" data-cy="ccm-source-record">
                 @for (entry of sourceEntries(e); track entry.key) {
                   <dt>{{ entry.key }}</dt><dd>{{ entry.value }}</dd>
@@ -67,6 +80,23 @@ import { CcmFacade } from '../ccm.facade';
             }
           </mat-card-content>
         </mat-card>
+
+        @if (e.relatedRecords?.length) {
+          <mat-card appearance="outlined" class="block" data-cy="ccm-related-records">
+            <mat-card-header><mat-card-title>Enregistrements liés ({{ e.relatedRecords?.length }})</mat-card-title></mat-card-header>
+            <mat-card-content>
+              <ul class="related">
+                @for (rec of e.relatedRecords; track $index) {
+                  <li>
+                    @for (entry of recordEntries(rec); track entry.key) {
+                      <span class="pair"><span class="k">{{ entry.key }}</span> {{ entry.value }}</span>
+                    }
+                  </li>
+                }
+              </ul>
+            </mat-card-content>
+          </mat-card>
+        }
 
         <mat-card appearance="outlined" class="block">
           <mat-card-header><mat-card-title>Triage</mat-card-title></mat-card-header>
@@ -119,8 +149,18 @@ import { CcmFacade } from '../ccm.facade';
       .block { margin-top: var(--ct-space-4); }
       .full { width: 100%; max-width: 420px; }
       code { font-family: var(--ct-font-mono); }
-      .source { display: grid; grid-template-columns: max-content 1fr; gap: var(--ct-space-1) var(--ct-space-4); margin: var(--ct-space-3) 0 0; }
-      .source dt { color: var(--ct-color-muted); } .source dd { margin: 0; }
+      .info { display: grid; grid-template-columns: max-content 1fr; gap: var(--ct-space-1) var(--ct-space-4); margin: var(--ct-space-3) 0 0; }
+      .info dt { color: var(--ct-color-muted); } .info dd { margin: 0; font-weight: 600; }
+      .info dd.amount { font-variant-numeric: tabular-nums; }
+      .muted { color: var(--ct-color-muted); font-weight: 400; }
+      .meta-label { display: block; color: var(--ct-color-muted); font-size: 0.8rem; margin: var(--ct-space-3) 0 var(--ct-space-1); }
+      .source { display: grid; grid-template-columns: max-content 1fr; gap: var(--ct-space-1) var(--ct-space-4); margin: 0; }
+      .source dt { color: var(--ct-color-muted); } .source dd { margin: 0; font-family: var(--ct-font-mono); }
+      .related { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--ct-space-2); }
+      .related li { display: flex; flex-wrap: wrap; gap: var(--ct-space-1) var(--ct-space-4); padding: var(--ct-space-2) 0; border-bottom: 1px solid var(--ct-color-border); }
+      .related li:last-child { border-bottom: 0; }
+      .pair { font-family: var(--ct-font-mono); font-size: 0.85rem; }
+      .pair .k { color: var(--ct-color-muted); }
       .error { color: var(--ct-red-700); }
     `,
   ],
@@ -144,9 +184,18 @@ export class CcmExceptionDetailPage implements OnInit {
   }
 
   sourceEntries(e: CcmException): { key: string; value: string }[] {
-    return e.sourceRecord
-      ? Object.entries(e.sourceRecord).map(([key, value]) => ({ key, value: String(value) }))
-      : [];
+    return this.recordEntries(e.sourceRecord);
+  }
+
+  recordEntries(record?: { [key: string]: unknown }): { key: string; value: string }[] {
+    return record ? Object.entries(record).map(([key, value]) => ({ key, value: String(value) })) : [];
+  }
+
+  /** Montant lisible avec devise (le serveur fournit `amount` en chaîne décimale, §5.3). */
+  money(m: { amount: string; currency: string }): string {
+    const n = Number(m.amount);
+    const formatted = Number.isFinite(n) ? n.toLocaleString('fr-FR') : m.amount;
+    return `${formatted} ${m.currency}`;
   }
 
   /** Exécute une action de triage décidée par le serveur ; écarter envoie la justification saisie. */
