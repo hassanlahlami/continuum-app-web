@@ -149,9 +149,9 @@ button:focus-visible,
 .app-bar .user span { color: var(--ct-color-muted); font-size: 0.78rem; }
 
 /* ———————————————————————————— Contenu ———————————————————————————— */
+/* Le contenu occupe toute la largeur restante après la barre latérale (pas de cap centré).
+   La lisibilité des longues proses reste bornée au cas par cas (voir `.mat-mdc-card-content p`). */
 main {
-  max-width: 1040px;
-  margin: 0 auto;
   padding: var(--ct-space-6) var(--ct-space-5);
 }
 
