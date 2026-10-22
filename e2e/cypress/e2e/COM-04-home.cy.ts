@@ -4,6 +4,12 @@
  * (`*hasFeature`). Servi par les mocks MSW.
  */
 describe('COM-04 — Accueil / Mes droits', () => {
+  it('affiche le bandeau d\'accueil avec l\'identité de l\'utilisateur', () => {
+    cy.visit('/');
+    cy.get('[data-cy=home-greeting]').should('contain', 'Inspecteur Un');
+    cy.get('[data-cy=home-hero]').should('contain', 'Banque Démo').and('contain', 'Inspection Générale');
+  });
+
   it('affiche les droits effectifs et la navigation filtrée', () => {
     cy.visit('/');
     cy.get('[data-cy=permission-item]').should('have.length.at.least', 1);
