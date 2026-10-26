@@ -1,3 +1,4 @@
+import { TasksPage } from './pages/tasks.page';
 import { Routes } from '@angular/router';
 import { requireFeature } from './guards/require-feature.guard';
 import { CcmControlDetailPage } from './pages/ccm-control-detail.page';
@@ -18,6 +19,7 @@ import { ProfilePage } from './pages/profile.page';
  */
 export const routes: Routes = [
   { path: '', pathMatch: 'full', component: MyPermissionsPage, data: { crumb: ['Accueil'] } },
+  { path: 'tasks', component: TasksPage, data: { crumb: ['Mes t�ches'] } },
   { path: 'profile', component: ProfilePage, data: { crumb: ['Profil & préférences'] } },
   { path: 'missions', canMatch: [requireFeature('mission.read')], component: MissionsPage, data: { crumb: ['Missions'] } },
   {

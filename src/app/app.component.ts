@@ -235,6 +235,7 @@ export class AppComponent implements OnInit {
         { label: 'Biblioth√®que', icon: 'checklist', route: '/ccm/controls', feature: 'ccm.read' },
       ],
     },
+    { items: [{ label: 'Mes t‚ches', icon: 'task_alt', route: '/tasks' }] },
     { items: [{ label: 'Profil', icon: 'account_circle', route: '/profile' }] },
   ];
 
