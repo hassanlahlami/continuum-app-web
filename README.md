@@ -10,7 +10,10 @@ Le client est généré depuis la spec **bundlée** (redocly) du module `me` et 
 
 ```bash
 npm install
-npm run generate:me     # génère libs/api-clients/me (typescript-angular)
+npm run generate:me        # libs/api-clients/me (spec bundlée du backend)
+npm run generate:missions  # bundle redocly (@redocly/cli, devDependency) puis client missions
+npm run generate:findings  # idem pour les constats
+npm run generate:ccm       # spec bundlée du backend
 npm run typecheck       # tsc --noEmit sur le client généré
 ```
 
