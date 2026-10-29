@@ -46,6 +46,12 @@ describe('SHELL-01 — Coquille & navigation', () => {
     cy.get('[data-cy=nav-toggle] mat-icon').should('have.attr', 'aria-hidden', 'true');
   });
 
+  it('contient la barre d\'application (dont le lien utilisateur) dans un repère banner', () => {
+    cy.visit('/');
+    cy.get('mat-toolbar.app-bar').should('have.attr', 'role', 'banner');
+    cy.get('[role=banner] [data-cy=app-user]').should('exist');
+  });
+
   it('replie et déploie la barre latérale (rail dynamique)', () => {
     cy.visit('/');
     cy.get('[data-cy=app-sidenav]').should('not.have.class', 'collapsed');

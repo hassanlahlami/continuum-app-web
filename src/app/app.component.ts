@@ -91,7 +91,7 @@ interface NavGroup {
       </mat-sidenav>
 
       <mat-sidenav-content class="shell-content">
-        <mat-toolbar class="app-bar">
+        <mat-toolbar class="app-bar" role="banner">
           <button mat-icon-button aria-label="Réduire ou déployer la navigation"
                   (click)="toggleNav(drawer)" data-cy="nav-toggle">
             <mat-icon aria-hidden="true">menu</mat-icon>
