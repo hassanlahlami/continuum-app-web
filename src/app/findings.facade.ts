@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Finding, FindingPage, FindingsService } from '../../libs/api-clients/findings';
+import { Finding, FindingPage, HistoryEntry, FindingsService } from '../../libs/api-clients/findings';
 
 /** Façade du module « constats » : consomme le client généré (D32). */
 @Injectable({ providedIn: 'root' })
@@ -39,6 +39,11 @@ export class FindingsFacade {
   /** Détail (FRAP) d'un constat d'une mission, §6. */
   get(missionId: string, findingId: string): Observable<Finding> {
     return this.api.getFinding(missionId, findingId);
+  }
+
+  /** Historique d'un constat (versions, revue, validation). */
+  history(missionId: string, findingId: string): Observable<HistoryEntry[]> {
+    return this.api.getFindingHistory(missionId, findingId);
   }
 
   /**
