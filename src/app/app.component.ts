@@ -94,7 +94,7 @@ interface NavGroup {
         <mat-toolbar class="app-bar">
           <button mat-icon-button aria-label="Réduire ou déployer la navigation"
                   (click)="toggleNav(drawer)" data-cy="nav-toggle">
-            <mat-icon>menu</mat-icon>
+            <mat-icon aria-hidden="true">menu</mat-icon>
           </button>
           <nav class="breadcrumb" aria-label="Fil d'Ariane" data-cy="breadcrumb">
             @for (c of crumbs(); track $index; let last = $last, first = $first) {
@@ -105,7 +105,7 @@ interface NavGroup {
           <span class="spacer"></span>
           <button mat-icon-button (click)="cycleTheme()" data-cy="theme-toggle"
                   [attr.aria-label]="'Thème : ' + theme()">
-            <mat-icon>{{ themeIcon() }}</mat-icon>
+            <mat-icon aria-hidden="true">{{ themeIcon() }}</mat-icon>
           </button>
           @if (me(); as user) {
             <a class="user" routerLink="/profile" data-cy="app-user" matTooltip="Profil & préférences" matTooltipPosition="below">
