@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
-import { AvailableAction, Finding } from '../../../libs/api-clients/findings';
+import { AvailableAction, Finding, HistoryEntry } from '../../../libs/api-clients/findings';
 import { FindingsFacade } from '../findings.facade';
 
 /**
@@ -112,6 +112,26 @@ import { FindingsFacade } from '../findings.facade';
             </mat-card-content>
           </mat-card>
         }
+
+        @if (history().length) {
+          <mat-card appearance="outlined" class="block" data-cy="finding-history">
+            <mat-card-header><mat-card-title>Historique</mat-card-title></mat-card-header>
+            <mat-card-content>
+              <ul class="reviews">
+                @for (h of history(); track $index) {
+                  <li>
+                    <div class="rc-head">
+                      <strong>{{ h.event.label }}</strong>
+                      @if (h.toStatus; as t) { <span class="badge">{{ h.fromStatus ? h.fromStatus.label + ' → ' : '' }}{{ t.label }}</span> }
+                      <span class="muted">{{ h.actor.displayName }} · {{ h.at | date: 'dd/MM/yyyy HH:mm' }}</span>
+                    </div>
+                    @if (h.comment) { <p>{{ h.comment }}</p> }
+                  </li>
+                }
+              </ul>
+            </mat-card-content>
+          </mat-card>
+        }
       } @else {
         <p>Chargement…</p>
       }
@@ -145,6 +165,7 @@ export class FindingDetailPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(FindingsFacade);
   readonly finding = signal<Finding | null>(null);
+  readonly history = signal<HistoryEntry[]>([]);
   readonly error = signal<string | null>(null);
   readonly busy = signal(false);
   missionId = '';
@@ -154,6 +175,7 @@ export class FindingDetailPage implements OnInit {
     const findingId = this.route.snapshot.paramMap.get('findingId');
     if (this.missionId && findingId) {
       this.facade.get(this.missionId, findingId).subscribe((f) => this.finding.set(f));
+      this.facade.history(this.missionId, findingId).subscribe({ next: (h) => this.history.set(h), error: () => this.history.set([]) });
     }
   }
 

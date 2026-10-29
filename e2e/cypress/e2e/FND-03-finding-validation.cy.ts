@@ -29,6 +29,14 @@ describe('FND-03 — FRAP : revue et validation', () => {
       .and('contain', 'Résolu');
   });
 
+  it("affiche l'historique du constat", () => {
+    cy.visit(`/missions/${mission}/findings/${openFinding}`);
+    cy.get('[data-cy=finding-history]')
+      .should('contain', 'Création')
+      .and('contain', 'Omar Haddad')
+      .and('contain', 'Précisez la cause racine.');
+  });
+
   it('montre un message clair quand la SoD dynamique bloque la validation (409)', () => {
     cy.visit(`/missions/${mission}/findings/${sodFinding}`);
     cy.get('[data-cy=finding-action-validate]').click();

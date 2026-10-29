@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import type { Finding, FindingPage } from '../api-clients/findings';
+import type { Finding, FindingPage, HistoryEntry } from '../api-clients/findings';
 
 /** Mocks MSW du module « constats » (front-first, GUIDE §6) — fixtures typées par le client généré. */
 const ALL_FINDINGS: Finding[] = [
@@ -43,6 +43,23 @@ const ALL_FINDINGS: Finding[] = [
     source: 'CCM',
     missionTitle: 'Contrôle continu',
     meta: { createdAt: '2026-01-18T08:30:00Z', version: 1 },
+  },
+];
+
+const historyFixture: HistoryEntry[] = [
+  {
+    at: '2026-01-10T10:00:00Z',
+    actor: { id: 'u-0001', displayName: 'Salma Idrissi' },
+    event: { code: 'CREATED', label: 'Création' },
+    toStatus: { code: 'OPEN', label: 'Ouvert' },
+  },
+  {
+    at: '2026-01-12T14:30:00Z',
+    actor: { id: 'u-0002', displayName: 'Omar Haddad' },
+    event: { code: 'REVIEWED', label: 'Revue' },
+    fromStatus: { code: 'OPEN', label: 'Ouvert' },
+    toStatus: { code: 'OPEN', label: 'Ouvert' },
+    comment: 'Précisez la cause racine.',
   },
 ];
 
@@ -139,6 +156,11 @@ export const findingsHandlers = [
   // Détail FRAP + actions disponibles.
   http.get('*/api/app/missions/:missionId/findings/:findingId', ({ params }) =>
     HttpResponse.json(openFinding(String(params['missionId']), String(params['findingId']))),
+  ),
+
+  // Historique du constat (versions, revue, validation).
+  http.get('*/api/app/missions/:missionId/findings/:findingId/history', () =>
+    HttpResponse.json(historyFixture),
   ),
 
   // Action décidée par le serveur : seule `validate` est reconnue ; autre code → 422.
