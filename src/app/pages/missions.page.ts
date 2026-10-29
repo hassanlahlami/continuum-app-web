@@ -105,7 +105,7 @@ import { MissionsFacade } from '../missions.facade';
               <tr mat-row *matRowDef="let row; columns: columns" data-cy="mission-row"
                   class="clickable" (click)="open(row)"></tr>
             </table>
-            <nav class="pager">
+            <nav class="pager" aria-label="Pagination">
               <button mat-stroked-button type="button" (click)="go(p.page - 1)" [disabled]="p.page <= 0">Précédent</button>
               <span>Page {{ p.page + 1 }} / {{ p.totalPages }}</span>
               <button mat-stroked-button type="button" (click)="go(p.page + 1)" [disabled]="p.page + 1 >= p.totalPages">Suivant</button>

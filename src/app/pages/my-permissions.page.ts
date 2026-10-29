@@ -37,7 +37,7 @@ import { PermissionsStore } from '../permissions.store';
         <header class="hero"><h1>Accueil</h1></header>
       }
 
-      <nav class="shortcuts" data-cy="home-nav">
+      <nav class="shortcuts" aria-label="Raccourcis" data-cy="home-nav">
         <a class="shortcut" routerLink="/missions" *hasFeature="'mission.read'">
           <span class="sc-ic"><mat-icon>folder_open</mat-icon></span>
           <span class="sc-body">

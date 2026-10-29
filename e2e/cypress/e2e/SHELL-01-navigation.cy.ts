@@ -16,6 +16,13 @@ describe('SHELL-01 — Coquille & navigation', () => {
     cy.get('[data-cy="nav-/ccm/controls"]').should('exist');
   });
 
+  it('expose les repères ARIA : barre latérale nommée, navigation étiquetée', () => {
+    cy.visit('/');
+    cy.get('[data-cy=app-sidenav]').should('have.attr', 'role', 'region').and('have.attr', 'aria-label');
+    cy.get('[data-cy=app-sidenav] .brand').should('be.visible');
+    cy.get('[data-cy=app-sidenav] mat-nav-list').should('have.attr', 'aria-label', 'Menu principal');
+  });
+
   it('navigue vers une page via la barre latérale', () => {
     cy.visit('/');
     cy.get('[data-cy="nav-/ccm/controls"]').click();
@@ -31,6 +38,12 @@ describe('SHELL-01 — Coquille & navigation', () => {
   it('affiche le fil d\'Ariane de la page courante', () => {
     cy.visit('/ccm/overview');
     cy.get('[data-cy=breadcrumb]').should('contain', 'Contrôle continu').and('contain', "Vue d'ensemble");
+  });
+
+  it('nomme le bouton de repli de la navigation (libellé ARIA, icône masquée)', () => {
+    cy.visit('/');
+    cy.get('[data-cy=nav-toggle]').should('have.attr', 'aria-label', 'Réduire ou déployer la navigation');
+    cy.get('[data-cy=nav-toggle] mat-icon').should('have.attr', 'aria-hidden', 'true');
   });
 
   it('replie et déploie la barre latérale (rail dynamique)', () => {

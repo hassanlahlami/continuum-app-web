@@ -57,6 +57,8 @@ interface NavGroup {
         class="shell-nav"
         [class.collapsed]="collapsed() && !isHandset()"
         data-cy="app-sidenav"
+        role="region"
+        aria-label="Barre latérale"
         [mode]="isHandset() ? 'over' : 'side'"
         [opened]="!isHandset()"
       >
@@ -64,7 +66,7 @@ interface NavGroup {
           <mat-icon aria-hidden="true">shield</mat-icon>
           <span>Continuum</span>
         </div>
-        <mat-nav-list>
+        <mat-nav-list aria-label="Menu principal">
           @for (group of visibleGroups(); track $index) {
             @if (group.label) {
               <h3 matSubheader>{{ group.label }}</h3>
@@ -92,7 +94,7 @@ interface NavGroup {
         <mat-toolbar class="app-bar">
           <button mat-icon-button aria-label="Réduire ou déployer la navigation"
                   (click)="toggleNav(drawer)" data-cy="nav-toggle">
-            <mat-icon>menu</mat-icon>
+            <mat-icon aria-hidden="true">menu</mat-icon>
           </button>
           <nav class="breadcrumb" aria-label="Fil d'Ariane" data-cy="breadcrumb">
             @for (c of crumbs(); track $index; let last = $last, first = $first) {
@@ -103,7 +105,7 @@ interface NavGroup {
           <span class="spacer"></span>
           <button mat-icon-button (click)="cycleTheme()" data-cy="theme-toggle"
                   [attr.aria-label]="'Thème : ' + theme()">
-            <mat-icon>{{ themeIcon() }}</mat-icon>
+            <mat-icon aria-hidden="true">{{ themeIcon() }}</mat-icon>
           </button>
           @if (me(); as user) {
             <a class="user" routerLink="/profile" data-cy="app-user" matTooltip="Profil & préférences" matTooltipPosition="below">
@@ -235,7 +237,7 @@ export class AppComponent implements OnInit {
         { label: 'Bibliothèque', icon: 'checklist', route: '/ccm/controls', feature: 'ccm.read' },
       ],
     },
-    { items: [{ label: 'Mes t�ches', icon: 'task_alt', route: '/tasks' }] },
+    { items: [{ label: 'Mes tâches', icon: 'task_alt', route: '/tasks' }] },
     { items: [{ label: 'Profil', icon: 'account_circle', route: '/profile' }] },
   ];
 
