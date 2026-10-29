@@ -82,7 +82,7 @@ import { TaskObjectType, TasksFacade } from '../tasks.facade';
                 </td>
               </ng-container>
               <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef></th>
+                <th mat-header-cell *matHeaderCellDef><span class="sr-only">Actions</span></th>
                 <td mat-cell *matCellDef="let t" class="row-actions">
                   @for (a of t.availableActions ?? []; track a.code) {
                     <button mat-flat-button [attr.data-cy]="'task-' + a.code" (click)="run(t, a.code)">{{ a.label }}</button>
@@ -110,6 +110,7 @@ import { TaskObjectType, TasksFacade } from '../tasks.facade';
       .table-card { margin-top: var(--ct-space-4); padding: 0; overflow: hidden; }
       table[mat-table] { width: 100%; background: transparent; }
       th.mat-mdc-header-cell { background: var(--ct-color-surface); }
+      .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
       .row-actions { display: flex; gap: var(--ct-space-2); justify-content: flex-end; align-items: center; }
       .muted { color: var(--ct-color-muted); }
       .overdue { color: var(--ct-color-danger); margin-left: var(--ct-space-2); }

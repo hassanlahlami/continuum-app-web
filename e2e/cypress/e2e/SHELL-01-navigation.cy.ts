@@ -16,6 +16,13 @@ describe('SHELL-01 — Coquille & navigation', () => {
     cy.get('[data-cy="nav-/ccm/controls"]').should('exist');
   });
 
+  it('expose les repères ARIA : barre latérale nommée, navigation étiquetée', () => {
+    cy.visit('/');
+    cy.get('[data-cy=app-sidenav]').should('have.attr', 'role', 'region').and('have.attr', 'aria-label');
+    cy.get('[data-cy=app-sidenav] .brand').should('be.visible');
+    cy.get('[data-cy=app-sidenav] mat-nav-list').should('have.attr', 'aria-label', 'Menu principal');
+  });
+
   it('navigue vers une page via la barre latérale', () => {
     cy.visit('/');
     cy.get('[data-cy="nav-/ccm/controls"]').click();

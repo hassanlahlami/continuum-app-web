@@ -57,6 +57,8 @@ interface NavGroup {
         class="shell-nav"
         [class.collapsed]="collapsed() && !isHandset()"
         data-cy="app-sidenav"
+        role="region"
+        aria-label="Barre latérale"
         [mode]="isHandset() ? 'over' : 'side'"
         [opened]="!isHandset()"
       >
@@ -64,7 +66,7 @@ interface NavGroup {
           <mat-icon aria-hidden="true">shield</mat-icon>
           <span>Continuum</span>
         </div>
-        <mat-nav-list>
+        <mat-nav-list aria-label="Menu principal">
           @for (group of visibleGroups(); track $index) {
             @if (group.label) {
               <h3 matSubheader>{{ group.label }}</h3>
@@ -235,7 +237,7 @@ export class AppComponent implements OnInit {
         { label: 'Bibliothèque', icon: 'checklist', route: '/ccm/controls', feature: 'ccm.read' },
       ],
     },
-    { items: [{ label: 'Mes t�ches', icon: 'task_alt', route: '/tasks' }] },
+    { items: [{ label: 'Mes tâches', icon: 'task_alt', route: '/tasks' }] },
     { items: [{ label: 'Profil', icon: 'account_circle', route: '/profile' }] },
   ];
 
