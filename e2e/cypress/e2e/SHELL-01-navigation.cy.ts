@@ -40,6 +40,12 @@ describe('SHELL-01 — Coquille & navigation', () => {
     cy.get('[data-cy=breadcrumb]').should('contain', 'Contrôle continu').and('contain', "Vue d'ensemble");
   });
 
+  it('nomme le bouton de repli de la navigation (libellé ARIA, icône masquée)', () => {
+    cy.visit('/');
+    cy.get('[data-cy=nav-toggle]').should('have.attr', 'aria-label', 'Réduire ou déployer la navigation');
+    cy.get('[data-cy=nav-toggle] mat-icon').should('have.attr', 'aria-hidden', 'true');
+  });
+
   it('replie et déploie la barre latérale (rail dynamique)', () => {
     cy.visit('/');
     cy.get('[data-cy=app-sidenav]').should('not.have.class', 'collapsed');

@@ -9,6 +9,11 @@ describe('COM-09 — Mes tâches', () => {
     cy.get('[data-cy=task-row]').first().should('contain', 'Valider le constat').find('[data-cy=task-overdue]');
   });
 
+  it('nomme la colonne d’actions (en-tête masqué visuellement)', () => {
+    cy.visit('/tasks');
+    cy.get('th.mat-mdc-header-cell').last().should('contain.text', 'Actions');
+  });
+
   it('filtre « en retard » reflété dans l’URL', () => {
     cy.visit('/tasks');
     cy.get('[data-cy=tasks-overdue]').click();
