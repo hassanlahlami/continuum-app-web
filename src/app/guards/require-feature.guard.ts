@@ -11,6 +11,6 @@ export function requireFeature(featureCode: string): CanMatchFn {
   return () => {
     const store = inject(PermissionsStore);
     const router = inject(Router);
-    return store.ensureLoaded().pipe(map(() => (store.has(featureCode) ? true : router.parseUrl('/'))));
+    return store.ensureLoaded().pipe(map(() => (store.has(featureCode) ? true : router.parseUrl('/error/403'))));
   };
 }
