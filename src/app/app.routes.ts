@@ -6,6 +6,7 @@ import { CcmControlsPage } from './pages/ccm-controls.page';
 import { CcmExceptionDetailPage } from './pages/ccm-exception-detail.page';
 import { CcmExceptionsPage } from './pages/ccm-exceptions.page';
 import { CcmOverviewPage } from './pages/ccm-overview.page';
+import { ErrorPage } from './pages/error.page';
 import { FindingDetailPage } from './pages/finding-detail.page';
 import { FindingsPage } from './pages/findings.page';
 import { MissionDetailPage } from './pages/mission-detail.page';
@@ -50,4 +51,6 @@ export const routes: Routes = [
     component: CcmExceptionDetailPage,
     data: { crumb: ['Contrôle continu', 'Exception'] },
   },
+  { path: 'error/:status', component: ErrorPage, data: { crumb: ['Erreur'] } },
+  { path: '**', component: ErrorPage, data: { status: 404, crumb: ['Erreur'] } },
 ];

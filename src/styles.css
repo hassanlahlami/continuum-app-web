@@ -406,7 +406,7 @@ tbody tr:hover { background: var(--ct-color-primary-soft); }
     --ct-color-primary-soft: #16304a;
     --ct-blue-50: #16304a; --ct-blue-600: #4d9bff; --ct-blue-700: #8ab4ff;
     --ct-green-50: #112a1c; --ct-green-600: #56d08a;
-    --ct-amber-50: #2a2210; --ct-amber-700: #f0c468;
+    --ct-amber-50: #2a2210; --ct-amber-700: #f2c15c;
     --ct-red-50: #2b1514; --ct-red-100: #4a2420; --ct-red-700: #ff8f85;
   }
 }
@@ -424,6 +424,6 @@ tbody tr:hover { background: var(--ct-color-primary-soft); }
   --ct-color-primary-soft: #16304a;
   --ct-blue-50: #16304a; --ct-blue-600: #4d9bff; --ct-blue-700: #8ab4ff;
   --ct-green-50: #112a1c; --ct-green-600: #56d08a;
-  --ct-amber-50: #2a2210; --ct-amber-700: #f0c468;
+  --ct-amber-50: #2a2210; --ct-amber-700: #f2c15c;
   --ct-red-50: #2b1514; --ct-red-100: #4a2420; --ct-red-700: #ff8f85;
 }
