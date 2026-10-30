@@ -6,6 +6,7 @@ import { CcmControlsPage } from './pages/ccm-controls.page';
 import { CcmExceptionDetailPage } from './pages/ccm-exception-detail.page';
 import { CcmExceptionsPage } from './pages/ccm-exceptions.page';
 import { CcmOverviewPage } from './pages/ccm-overview.page';
+import { CcmRunDetailPage } from './pages/ccm-run-detail.page';
 import { ErrorPage } from './pages/error.page';
 import { FindingDetailPage } from './pages/finding-detail.page';
 import { FindingsPage } from './pages/findings.page';
@@ -44,6 +45,12 @@ export const routes: Routes = [
     canMatch: [requireFeature('ccm.read')],
     component: CcmControlDetailPage,
     data: { crumb: ['Contr√¥le continu', 'Biblioth√®que', 'Fiche contr√¥le'] },
+  },
+  {
+    path: 'ccm/runs/:runId',
+    canMatch: [requireFeature('ccm.read')],
+    component: CcmRunDetailPage,
+    data: { crumb: ['ContrÙle continu', 'ExÈcution'] },
   },
   {
     path: 'ccm/exceptions/:exceptionId',

@@ -9,6 +9,7 @@ import {
   CcmExceptionsService,
   CcmOverview,
   CcmOverviewService,
+  CcmRun,
   CcmRunPage,
   CcmRunsService,
   ConvertCcmExceptionToFinding201Response,
@@ -33,6 +34,11 @@ export class CcmFacade {
   /** Historique des exécutions d'un contrôle (§5, plus récentes d'abord ; périmètre appliqué serveur). */
   listControlRuns(controlId: string, page = 0, size = 10): Observable<CcmRunPage> {
     return this.runs.listCcmControlRuns(controlId, page, size);
+  }
+
+  /** Détail d'une exécution (population testée, exceptions, durée, source de données). */
+  getRun(runId: string): Observable<CcmRun> {
+    return this.runs.getCcmRun(runId);
   }
 
   /** Bibliothèque de contrôles (§5), filtrable ; le périmètre ({@code ccm.read}) est appliqué par le serveur. */
