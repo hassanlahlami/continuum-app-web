@@ -204,6 +204,43 @@ export const ccmHandlers = [
     return HttpResponse.json(runs);
   }),
 
+  // Détail d'une exécution (§5).
+  http.get('*/api/app/ccm/runs/:runId', ({ params }) => {
+    const runId = String(params['runId']);
+    const base = {
+      id: runId,
+      controlId: 'cc100000-0000-0000-0000-000000000002',
+      controlLabel: 'Écritures hors seuil / hors heures',
+      trigger: 'SCHEDULE',
+    };
+    if (runId === 'run00000-0000-0000-0000-000000000001') {
+      return HttpResponse.json({
+        ...base,
+        status: 'FAILED',
+        startedAt: '2026-09-11T06:00:00Z',
+        finishedAt: '2026-09-11T06:00:04Z',
+        exceptionsCount: 0,
+        problem: { title: "Échec d'exécution", status: 502, detail: 'connexion CBS perdue', traceId: 'mock-run-01' },
+      });
+    }
+    if (runId !== 'run00000-0000-0000-0000-000000000002') {
+      return HttpResponse.json(
+        { title: 'Introuvable', status: 404 },
+        { status: 404, headers: { 'Content-Type': 'application/problem+json' } },
+      );
+    }
+    return HttpResponse.json({
+      ...base,
+      status: 'SUCCEEDED',
+      startedAt: '2026-09-12T06:00:00Z',
+      finishedAt: '2026-09-12T06:00:12Z',
+      populationSize: 1200,
+      exceptionsCount: 2,
+      dataSource: 'amplitude-sim (JDBC, vues V_AUDIT_*)',
+      parametersUsed: { thresholdAmount: 1000000 },
+    });
+  }),
+
   // Fiche d'un contrôle.
   http.get('*/api/app/ccm/controls/:controlId', ({ params }) => {
     const control = ccmControlsFixture.find((c) => c.id === String(params['controlId']));

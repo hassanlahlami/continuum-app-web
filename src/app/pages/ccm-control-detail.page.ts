@@ -103,7 +103,7 @@ import { formatParameterValue, humanizeCron } from '../format';
               </ng-container>
               <ng-container matColumnDef="startedAt">
                 <th mat-header-cell *matHeaderCellDef>Début</th>
-                <td mat-cell *matCellDef="let r">{{ r.startedAt | date: 'short' }}</td>
+                <td mat-cell *matCellDef="let r"><a [routerLink]="['/ccm/runs', r.id]" data-cy="ccm-run-link">{{ r.startedAt | date: 'short' }}</a></td>
               </ng-container>
               <ng-container matColumnDef="exceptions">
                 <th mat-header-cell *matHeaderCellDef>Exceptions</th>
