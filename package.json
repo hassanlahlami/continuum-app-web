@@ -10,6 +10,8 @@
     "serve:mock": "ng serve --port 4200",
     "e2e:run": "cypress run --project e2e",
     "e2e:open": "cypress open --project e2e",
+    "serve:live": "ng serve --configuration live --port 4202",
+    "e2e:live": "cypress run --project e2e --config-file cypress.live.config.ts",
     "e2e": "start-server-and-test serve:mock http-get://localhost:4200 e2e:run",
     "generate:me": "openapi-generator-cli generate -i ../continuum-backend/src/main/openapi/me.bundled.yaml -g typescript-angular -o libs/api-clients/me --additional-properties=ngVersion=19.0.0,supportsES6=true,withInterfaces=true",
     "generate:missions": "redocly bundle ../Instructions/contracts/openapi/app/missions.yaml -o libs/.contracts/missions.bundled.yaml && openapi-generator-cli generate -i libs/.contracts/missions.bundled.yaml -g typescript-angular -o libs/api-clients/missions --additional-properties=ngVersion=19.0.0,supportsES6=true,withInterfaces=true",
