@@ -252,7 +252,15 @@ export const ccmHandlers = [
   // Flux d'exceptions à trier (filtre `assignedToMe` : seule l'exception NEW est affectée au courant).
   http.get('*/api/app/ccm/exceptions', ({ request }) => {
     const mine = new URL(request.url).searchParams.get('assignedToMe') === 'true';
-    const items = ccmExceptionPageFixture.items.filter((e) => !mine || e.id === NEW_ID);
+    const url = new URL(request.url);
+    const statuses = url.searchParams.getAll('status');
+    const crit = url.searchParams.get('criticality');
+    const items = ccmExceptionPageFixture.items.filter(
+      (e) =>
+        (!mine || e.id === NEW_ID) &&
+        (!statuses.length || statuses.includes(e.status.code)) &&
+        (!crit || e.criticality?.code === crit),
+    );
     return HttpResponse.json({ ...ccmExceptionPageFixture, totalItems: items.length, items });
   }),
 

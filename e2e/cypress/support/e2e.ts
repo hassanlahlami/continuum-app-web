@@ -1,5 +1,5 @@
 /**
- * Fichier de support Cypress (chargé avant chaque spec). Volontairement minimal : aucune commande
- * personnalisée pour l'instant. Les specs ciblent exclusivement des sélecteurs `data-cy`.
+ * Fichier de support Cypress (chargé avant chaque spec). Les specs ciblent exclusivement des sélecteurs
+ * `data-cy`. `cypress-axe` fournit `cy.injectAxe()` / `cy.checkA11y()` pour les contrôles d'accessibilité.
  */
-export {};
+import 'cypress-axe';
