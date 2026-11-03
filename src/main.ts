@@ -1,15 +1,15 @@
 import { registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideHttpClient, withInterceptors, withXsrfConfiguration } from '@angular/common/http';
 import { LOCALE_ID, inject, provideAppInitializer } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
-import { OAuthService, provideOAuthClient } from 'angular-oauth2-oidc';
+import { catchError, firstValueFrom, of } from 'rxjs';
 import { BASE_PATH } from '../libs/api-clients/me';
 import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
-import { buildAuthConfig } from './app/auth/auth.config';
+import { AUTH_ENTITY, AuthFacade } from './app/auth/auth.facade';
 import { authInterceptor } from './app/auth/auth.interceptor';
 import { errorInterceptor } from './app/errors/error.interceptor';
 import { environment } from './environments/environment';
@@ -100,21 +100,18 @@ startMocksInDev()
     bootstrapApplication(AppComponent, {
       providers: [
         { provide: LOCALE_ID, useValue: 'fr' },
-        provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
+        provideHttpClient(
+          withInterceptors([authInterceptor, errorInterceptor]),
+          withXsrfConfiguration({ cookieName: 'XSRF-TOKEN', headerName: 'X-XSRF-TOKEN' }),
+        ),
         provideAnimationsAsync(),
         provideRouter(routes),
-        provideOAuthClient(),
+        { provide: AUTH_ENTITY, useValue: config.tenantCode },
         { provide: BASE_PATH, useValue: config.apiBaseUrl },
-        provideAppInitializer(() => {
-          const oauth = inject(OAuthService);
-          oauth.configure(buildAuthConfig(config.oidcIssuer));
-          // Mode mocks : best-effort (« sans backend/login », cf. environment). Si Keycloak est absent,
-          // l'échec du document de découverte ne doit pas empêcher l'amorçage — on reste déconnecté.
-          // Mode live : on exige la connexion (redirection vers Keycloak si pas de jeton valide), §4.5.
-          return environment.useMocks
-            ? oauth.loadDiscoveryDocumentAndTryLogin().catch(() => true)
-            : oauth.loadDiscoveryDocumentAndLogin();
-        }),
+        // Charge l'état de session et pose le cookie CSRF avant l'amorçage ; la garde route vers /login (D41).
+        provideAppInitializer(() =>
+          firstValueFrom(inject(AuthFacade).refresh().pipe(catchError(() => of(undefined)))),
+        ),
       ],
     }),
   )
