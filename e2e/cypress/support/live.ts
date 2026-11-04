@@ -32,7 +32,7 @@ Cypress.Commands.add('loginKeycloak', () => {
   cy.session(
     ['bff-code-app', username],
     () => {
-      const entity = Cypress.env('APP_ENTITY') ?? 'dss';
+      const entity = Cypress.env('APP_ENTITY') ?? 'BANQUE-DEMO';
       // Code+PKCE driven with cy.request (no cy.origin): follow redirects by hand, submit Keycloak's HTML forms.
       const kc = Cypress.env('SIM_KC_URL') ?? 'http://localhost:8180';
       const formAction = (html: string) => {
