@@ -1,5 +1,6 @@
 import { TasksPage } from './pages/tasks.page';
 import { Routes } from '@angular/router';
+import { authGuard } from './auth/auth.guard';
 import { requireFeature } from './guards/require-feature.guard';
 import { CcmControlDetailPage } from './pages/ccm-control-detail.page';
 import { CcmControlsPage } from './pages/ccm-controls.page';
@@ -10,6 +11,7 @@ import { CcmRunDetailPage } from './pages/ccm-run-detail.page';
 import { ErrorPage } from './pages/error.page';
 import { FindingDetailPage } from './pages/finding-detail.page';
 import { FindingsPage } from './pages/findings.page';
+import { LoginPage } from './pages/login.page';
 import { MissionDetailPage } from './pages/mission-detail.page';
 import { MissionsPage } from './pages/missions.page';
 import { MyPermissionsPage } from './pages/my-permissions.page';
@@ -19,7 +21,7 @@ import { ProfilePage } from './pages/profile.page';
  * Routes de la Plateforme Fonctionnelle. Les gardes `canMatch` reflètent les droits (§2.1.7) ;
  * `data.crumb` alimente le fil d'Ariane de la coquille (orientation dans la toolbar).
  */
-export const routes: Routes = [
+const guarded: Routes = [
   { path: '', pathMatch: 'full', component: MyPermissionsPage, data: { crumb: ['Accueil'] } },
   { path: 'tasks', component: TasksPage, data: { crumb: ['Mes t�ches'] } },
   { path: 'profile', component: ProfilePage, data: { crumb: ['Profil & préférences'] } },
@@ -58,6 +60,11 @@ export const routes: Routes = [
     component: CcmExceptionDetailPage,
     data: { crumb: ['Contrôle continu', 'Exception'] },
   },
+];
+
+export const routes: Routes = [
+  { path: 'login', component: LoginPage, data: { crumb: ['Connexion'] } },
+  { path: '', canActivateChild: [authGuard], children: guarded },
   { path: 'error/:status', component: ErrorPage, data: { crumb: ['Erreur'] } },
   { path: '**', component: ErrorPage, data: { status: 404, crumb: ['Erreur'] } },
 ];

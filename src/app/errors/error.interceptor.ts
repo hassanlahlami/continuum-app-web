@@ -15,7 +15,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       // On ne signale que les erreurs de l'API Continuum (`/api/…`) ; les appels tiers gérés par la
       // librairie OIDC (découverte Keycloak `/.well-known/…`, jetons) ne doivent pas polluer le bandeau
       // d'erreur — notamment en mode mock/démo où Keycloak est absent.
-      if (req.url.includes('/api/')) {
+      // Les échecs de /api/auth/login et /mfa sont affichés par la page de connexion (COM-01).
+      if (req.url.includes('/api/') && !/\/api\/auth\/(login|mfa)/.test(req.url)) {
         const problem: Record<string, unknown> =
           err.error && typeof err.error === 'object' ? (err.error as Record<string, unknown>) : {};
         store.report({
