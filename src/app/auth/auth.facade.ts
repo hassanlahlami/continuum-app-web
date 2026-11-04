@@ -50,12 +50,12 @@ export class AuthFacade {
 
   /** Charge l'état de session et pose le cookie CSRF. */
   refresh(): Observable<SessionState> {
-    return this.sessionApi.getSession().pipe(tap((s) => this.session.set(s)));
+    return this.sessionApi.getSession('app').pipe(tap((s) => this.session.set(s)));
   }
 
   signIn(username: string, password: string): Observable<LoginResult> {
     return this.withCsrfRetry(() =>
-      this.loginApi.login(readXsrfCookie(), { entity: this.entity, username, password }),
+      this.loginApi.login(readXsrfCookie(), { app: 'app', entity: this.entity, username, password }),
     ).pipe(tap((r) => this.track(r)));
   }
 
@@ -92,7 +92,7 @@ export class AuthFacade {
     return call().pipe(
       catchError((err: HttpErrorResponse) =>
         problemOf(err)?.reason === 'csrf-invalid'
-          ? this.sessionApi.getSession().pipe(switchMap(() => call()))
+          ? this.sessionApi.getSession('app').pipe(switchMap(() => call()))
           : throwError(() => err),
       ),
     );

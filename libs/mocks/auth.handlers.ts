@@ -10,8 +10,12 @@ import type { AuthProblem, LoginOptions, LoginRequest, MfaRequest, SessionState 
  * Code OTP valide : `123456`.
  */
 const XSRF = 'mock-xsrf-token';
-let session: SessionState = { authenticated: false };
+type Front = 'app' | 'admin';
+/** Une session par front (cookies `CT_SESSION` / `CT_ADMIN_SESSION` distincts, auth.yaml v0.2.0). */
+const sessions: Record<Front, SessionState> = { app: { authenticated: false }, admin: { authenticated: false } };
+const frontOf = (v: unknown): Front => (v === 'admin' ? 'admin' : 'app');
 let lastChallenge: string | undefined;
+let challengeFront: Front = 'app';
 
 export const loginOptionsFixture: LoginOptions = {
   mode: 'rest',
@@ -35,15 +39,17 @@ const problem = (status: number, reason: AuthProblem['reason'], title: string, h
   );
 
 const csrfOk = (req: Request) => req.headers.get('X-XSRF-TOKEN') === XSRF;
-const open = () => {
-  session = authenticatedSessionFixture;
-  return HttpResponse.json({ status: 'AUTHENTICATED', session });
+const open = (front: Front) => {
+  sessions[front] = authenticatedSessionFixture;
+  return HttpResponse.json({ status: 'AUTHENTICATED', session: sessions[front] });
 };
 
 /** Remet la session mock à zéro (tests). */
 export function resetAuthMock(): void {
-  session = { authenticated: false };
+  sessions.app = { authenticated: false };
+  sessions.admin = { authenticated: false };
   lastChallenge = undefined;
+  challengeFront = 'app';
 }
 
 export const authHandlers = [
@@ -52,19 +58,21 @@ export const authHandlers = [
     const forced = (globalThis as { __ctMock?: { loginMode?: string } }).__ctMock?.loginMode;
     return HttpResponse.json(forced === 'redirect' ? { ...loginOptionsFixture, mode: 'redirect' } : loginOptionsFixture);
   }),
-  http.get('*/api/auth/session', () => {
+  http.get('*/api/auth/session', ({ request }) => {
     if (typeof document !== 'undefined') {
       document.cookie = `XSRF-TOKEN=${XSRF}; path=/; SameSite=Strict`;
     }
-    return HttpResponse.json(session);
+    return HttpResponse.json(sessions[frontOf(new URL(request.url).searchParams.get('app'))]);
   }),
   http.post('*/api/auth/login', async ({ request }) => {
     if (!csrfOk(request)) return problem(403, 'csrf-invalid', 'Jeton CSRF invalide');
     const body = (await request.json()) as LoginRequest;
+    const front = frontOf(body.app);
     switch (body.username) {
       case 'ratelimited':
         return problem(429, 'rate-limited', 'Trop de tentatives', { 'Retry-After': '30' });
       case 'mfa':
+        challengeFront = front;
         lastChallenge = '9c1f3a52-7d0e-4b1e-8a64-2f5d6e7a8b90';
         return HttpResponse.json({ status: 'MFA_REQUIRED', challengeId: lastChallenge, methods: ['otp'] });
       case 'action':
@@ -72,19 +80,20 @@ export const authHandlers = [
       case 'locked':
         return problem(401, 'invalid-credentials', 'Identifiants invalides');
       default:
-        return body.password === 'demo' ? open() : problem(401, 'invalid-credentials', 'Identifiants invalides');
+        return body.password === 'demo' ? open(front) : problem(401, 'invalid-credentials', 'Identifiants invalides');
     }
   }),
   http.post('*/api/auth/mfa', async ({ request }) => {
     if (!csrfOk(request)) return problem(403, 'csrf-invalid', 'Jeton CSRF invalide');
     const body = (await request.json()) as MfaRequest;
     return body.challengeId === lastChallenge && body.code === '123456'
-      ? open()
+      ? open(challengeFront)
       : problem(401, 'invalid-credentials', 'Code invalide');
   }),
   http.post('*/api/auth/logout', ({ request }) => {
     if (!csrfOk(request)) return problem(403, 'csrf-invalid', 'Jeton CSRF invalide');
-    session = { authenticated: false };
+    // Le cookie présenté désigne le front ; en mock, la session `app` est la seule que ce front lit.
+    sessions.app = { authenticated: false };
     return new HttpResponse(null, { status: 204 });
   }),
 ];
