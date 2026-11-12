@@ -4,6 +4,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { AuthFacade } from '../auth/auth.facade';
 import { Me } from '../../../libs/api-clients/me';
 import { MeFacade } from '../me.facade';
 import { ThemeService, ThemePref } from '../theme.service';
@@ -31,6 +32,7 @@ import { ThemeService, ThemePref } from '../theme.service';
               <dt>Entité</dt><dd>{{ m.entity.label }}</dd>
               <dt>Dernière connexion</dt><dd>{{ m.lastLoginAt ? (m.lastLoginAt | date: 'dd/MM/yyyy HH:mm') : '—' }}</dd>
             </dl>
+            <a class="link" [href]="changePasswordUrl" data-cy="profile-change-password">Changer le mot de passe</a>
           </mat-card-content>
         </mat-card>
 
@@ -65,6 +67,7 @@ import { ThemeService, ThemePref } from '../theme.service';
       .kv dd { margin: 0; font-weight: 600; }
       .pref { display: flex; align-items: center; gap: var(--ct-space-4); margin: var(--ct-space-3) 0; }
       .pref-label { color: var(--ct-color-muted); font-size: 0.8rem; min-width: 80px; }
+      .link { display: inline-block; margin-top: var(--ct-space-3); color: var(--ct-color-primary); font-size: 0.85rem; }
       .muted { color: var(--ct-color-muted); }
       mat-button-toggle mat-icon { font-size: 18px; height: 18px; width: 18px; vertical-align: middle; }
     `,
@@ -73,6 +76,7 @@ import { ThemeService, ThemePref } from '../theme.service';
 export class ProfilePage implements OnInit {
   private readonly facade = inject(MeFacade);
   private readonly themeSvc = inject(ThemeService);
+  readonly changePasswordUrl = inject(AuthFacade).changePasswordUrl('/profile');
   readonly me = signal<Me | null>(null);
   readonly theme = this.themeSvc.theme;
 

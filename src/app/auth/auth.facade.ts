@@ -79,6 +79,16 @@ export class AuthFacade {
     return `/api/auth/authorize?${q.toString()}`;
   }
 
+  /** Navigation vers Keycloak pour changer le mot de passe (`kc_action=UPDATE_PASSWORD` via le BFF, auth.yaml v0.3.0). */
+  changePasswordUrl(returnTo: string): string {
+    return `/api/auth/authorize?${new URLSearchParams({ app: 'app', action: 'update-password', returnTo: safeReturnTo(returnTo) })}`;
+  }
+
+  /** Mot de passe oublié : retour à la page de connexion Keycloak (lien « oublié » du thème), puis `/`. */
+  forgotPasswordUrl(): string {
+    return `/api/auth/authorize?${new URLSearchParams({ app: 'app', returnTo: '/' })}`;
+  }
+
   /** Navigation (pas XHR) vers le step-up (`acr` supérieur), terminé par le BFF. */
   stepUpUrl(acr: number, returnTo: string): string {
     return `/api/auth/step-up?${new URLSearchParams({ acr: String(acr), returnTo: safeReturnTo(returnTo) })}`;

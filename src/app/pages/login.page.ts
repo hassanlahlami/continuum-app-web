@@ -54,6 +54,7 @@ type Step = 'credentials' | 'mfa';
           <button mat-flat-button type="button" (click)="redirect()" data-cy="login-redirect">Se connecter</button>
         }
         @if (step() === 'credentials') {
+          <a class="link" [href]="forgotUrl" data-cy="login-forgot-password">Mot de passe oublié ?</a>
           @for (p of o.ssoProviders; track p.alias) {
             <button mat-stroked-button type="button" (click)="redirect(p.alias)" [attr.data-cy]="'login-sso-' + p.alias">
               {{ p.label.fr }}
@@ -66,6 +67,7 @@ type Step = 'credentials' | 'mfa';
   styles: [
     `
       .login { display: flex; flex-direction: column; gap: var(--ct-space-3); max-width: 24rem; margin: var(--ct-space-6) auto; padding: var(--ct-space-4); background: var(--ct-color-surface); border: 1px solid var(--ct-color-border); border-radius: var(--ct-radius-md); }
+      .link { color: var(--ct-color-primary); font-size: 0.85rem; }
       form { display: flex; flex-direction: column; gap: var(--ct-space-2); }
       .err { background: var(--ct-red-50); color: var(--ct-red-700); border: 1px solid var(--ct-red-100); border-radius: var(--ct-radius-sm); padding: var(--ct-space-2) var(--ct-space-3); margin: 0; }
     `,
@@ -77,6 +79,7 @@ export class LoginPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
 
+  readonly forgotUrl = inject(AuthFacade).forgotPasswordUrl();
   readonly options = signal<LoginOptions | undefined>(undefined);
   readonly step = signal<Step>('credentials');
   readonly error = signal<string | undefined>(undefined);

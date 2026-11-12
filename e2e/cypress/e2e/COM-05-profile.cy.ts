@@ -26,4 +26,14 @@ describe('COM-05 — Profil & préférences', () => {
     cy.location('pathname').should('eq', '/profile');
     cy.get('[data-cy=profile-identity]').should('exist');
   });
+
+  it('propose « Changer le mot de passe » (authorize, action=update-password, retour profil)', () => {
+    cy.visit('/profile');
+    cy.get('[data-cy=profile-change-password]')
+      .should('have.attr', 'href')
+      .and('include', '/api/auth/authorize?')
+      .and('include', 'app=app')
+      .and('include', 'action=update-password')
+      .and('include', 'returnTo=%2Fprofile');
+  });
 });
