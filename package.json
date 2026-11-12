@@ -13,11 +13,11 @@
     "serve:live": "ng serve --configuration live --port 4203",
     "e2e:live": "cypress run --project e2e --config-file cypress.live.config.ts",
     "e2e": "start-server-and-test serve:mock http-get://localhost:4200 e2e:run",
-    "generate:me": "openapi-generator-cli generate -i ../continuum-backend/src/main/openapi/me.bundled.yaml -g typescript-angular -o libs/api-clients/me --additional-properties=ngVersion=19.0.0,supportsES6=true,withInterfaces=true",
+    "generate:me": "redocly bundle ../Instructions/contracts/openapi/app/me.yaml -o libs/.contracts/me.bundled.yaml && openapi-generator-cli generate -i libs/.contracts/me.bundled.yaml -g typescript-angular -o libs/api-clients/me --additional-properties=ngVersion=19.0.0,supportsES6=true,withInterfaces=true",
     "generate:missions": "redocly bundle ../Instructions/contracts/openapi/app/missions.yaml -o libs/.contracts/missions.bundled.yaml && openapi-generator-cli generate -i libs/.contracts/missions.bundled.yaml -g typescript-angular -o libs/api-clients/missions --additional-properties=ngVersion=19.0.0,supportsES6=true,withInterfaces=true",
     "generate:findings": "redocly bundle ../Instructions/contracts/openapi/app/findings.yaml -o libs/.contracts/findings.bundled.yaml && openapi-generator-cli generate -i libs/.contracts/findings.bundled.yaml -g typescript-angular -o libs/api-clients/findings --additional-properties=ngVersion=19.0.0,supportsES6=true,withInterfaces=true",
     "generate:auth": "redocly bundle ../Instructions/contracts/openapi/public/auth.yaml -o libs/.contracts/auth.bundled.yaml && openapi-generator-cli generate -i libs/.contracts/auth.bundled.yaml -g typescript-angular -o libs/api-clients/auth --additional-properties=ngVersion=19.0.0,supportsES6=true,withInterfaces=true",
-    "generate:ccm": "openapi-generator-cli generate -i ../continuum-backend/src/main/openapi/ccm.bundled.yaml -g typescript-angular -o libs/api-clients/ccm --additional-properties=ngVersion=19.0.0,supportsES6=true,withInterfaces=true"
+    "generate:ccm": "redocly bundle ../Instructions/contracts/openapi/app/ccm.yaml -o libs/.contracts/ccm.bundled.yaml && openapi-generator-cli generate -i libs/.contracts/ccm.bundled.yaml -g typescript-angular -o libs/api-clients/ccm --additional-properties=ngVersion=19.0.0,supportsES6=true,withInterfaces=true"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^19.2.27",
