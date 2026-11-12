@@ -85,4 +85,14 @@ describe('COM-01 — Connexion', () => {
     cy.visit('/login', { onBeforeLoad: (w) => w.document.documentElement.setAttribute('dir', 'rtl') });
     cy.get('[data-cy=login-form]').should('be.visible');
   });
+
+  it('lien « mot de passe oublié » → /api/auth/authorize?app=app&returnTo=/', () => {
+    cy.visit('/login');
+    cy.get('[data-cy=login-forgot-password]')
+      .should('have.attr', 'href')
+      .and('include', '/api/auth/authorize?')
+      .and('include', 'app=app')
+      .and('include', 'returnTo=%2F')
+      .and('not.include', 'action=');
+  });
 });

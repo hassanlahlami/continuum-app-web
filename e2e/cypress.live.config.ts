@@ -12,6 +12,9 @@ export default defineConfig({
     supportFile: 'cypress/support/live.ts',
     fixturesFolder: false,
     video: false,
+    setupNodeEvents(on) {
+      on('task', { log: (m: string) => { console.log(m); return null; } });
+    },
     screenshotOnRunFailure: false,
     env: { KEYCLOAK_ORIGIN: 'http://localhost:8180' },
   },
