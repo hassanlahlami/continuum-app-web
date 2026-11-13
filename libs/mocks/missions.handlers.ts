@@ -67,7 +67,44 @@ export const missionsPageFixture: MissionPage = {
   items: ALL_MISSIONS,
 };
 
+const UNIT = '3f6c2a1e-8b7d-4c21-9a55-0e2f4b6d8c10';
+const TYPES = [
+  { code: 'INSPECTION', label: 'Inspection', processKey: 'mission-inspection', defaultDurationDays: 15 },
+  { code: 'AUDIT', label: 'Audit', processKey: 'mission-audit', defaultDurationDays: 30 },
+];
+const ENTITIES = [
+  { id: 'ae-0001', label: 'Agence A001 — Casablanca Centre', kind: 'ORG_UNIT', unitId: UNIT, meta: { createdAt: '2026-01-01T00:00:00Z', version: 1 } },
+  { id: 'ae-0002', label: 'Back-office crédits', kind: 'PROCESS', unitId: UNIT, meta: { createdAt: '2026-01-01T00:00:00Z', version: 1 } },
+];
+
 export const missionsHandlers = [
+  http.get('*/api/app/mission-types', () => HttpResponse.json(TYPES)),
+  http.get('*/api/app/auditable-entities', ({ request }) => {
+    const q = new URL(request.url).searchParams.get('q')?.toLowerCase();
+    const items = ENTITIES.filter((e) => !q || e.label.toLowerCase().includes(q));
+    return HttpResponse.json({ page: 0, size: 50, totalItems: items.length, totalPages: 1, items });
+  }),
+  http.post('*/api/app/missions', async ({ request }) => {
+    const b = (await request.json()) as { title?: string; plannedStart?: string; plannedEnd?: string };
+    if (!b.title || !b.plannedStart || !b.plannedEnd || b.plannedEnd < b.plannedStart) {
+      return HttpResponse.json(
+        { type: 'about:blank', title: 'Validation failed', status: 422 },
+        { status: 422, headers: { 'Content-Type': 'application/problem+json' } },
+      );
+    }
+    return HttpResponse.json(
+      {
+        ...missionFixture,
+        id: 'a1c2e3f4-0000-0000-0000-0000000000ff',
+        reference: 'MIS-2026-NEW-001',
+        title: b.title,
+        status: { code: 'PLANNED', label: 'Planifiée' },
+        phase: { code: 'PREPARATION', label: 'Préparation' },
+        meta: { createdAt: new Date().toISOString(), version: 1 },
+      },
+      { status: 201 },
+    );
+  }),
   http.get('*/api/app/missions', ({ request }) => {
     const url = new URL(request.url);
     const q = url.searchParams.get('q')?.toLowerCase();

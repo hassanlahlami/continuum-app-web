@@ -13,6 +13,7 @@ import { FindingDetailPage } from './pages/finding-detail.page';
 import { FindingsPage } from './pages/findings.page';
 import { LoginPage } from './pages/login.page';
 import { MissionDetailPage } from './pages/mission-detail.page';
+import { MissionNewPage } from './pages/mission-new.page';
 import { MissionsPage } from './pages/missions.page';
 import { MyPermissionsPage } from './pages/my-permissions.page';
 import { ProfilePage } from './pages/profile.page';
@@ -26,6 +27,12 @@ const guarded: Routes = [
   { path: 'tasks', component: TasksPage, data: { crumb: ['Mes t�ches'] } },
   { path: 'profile', component: ProfilePage, data: { crumb: ['Profil & préférences'] } },
   { path: 'missions', canMatch: [requireFeature('mission.read')], component: MissionsPage, data: { crumb: ['Missions'] } },
+  {
+    path: 'missions/new',
+    canMatch: [requireFeature('mission.create')],
+    component: MissionNewPage,
+    data: { crumb: ['Missions', 'Nouvelle mission'] },
+  },
   {
     path: 'missions/:id',
     canMatch: [requireFeature('mission.read')],
