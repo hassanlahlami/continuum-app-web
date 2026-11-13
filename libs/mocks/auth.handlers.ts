@@ -38,6 +38,9 @@ const problem = (status: number, reason: AuthProblem['reason'], title: string, h
     { status, headers: { 'Content-Type': 'application/problem+json', ...headers } },
   );
 
+const problemJson = (status: number, title: string) =>
+  HttpResponse.json({ type: 'about:blank', title, status }, { status, headers: { 'Content-Type': 'application/problem+json' } });
+
 const csrfOk = (req: Request) => req.headers.get('X-XSRF-TOKEN') === XSRF;
 const open = (front: Front) => {
   sessions[front] = authenticatedSessionFixture;
@@ -55,8 +58,12 @@ export function resetAuthMock(): void {
 export const authHandlers = [
   http.get('*/api/auth/options', ({ request }) => {
     // Les handlers MSW tournent dans la page : un test peut forcer le mode via `window.__ctMock.loginMode`.
+    const url = new URL(request.url);
+    if (url.searchParams.get('entity') === 'unknown') return problemJson(404, 'Tenant introuvable');
     const forced = (globalThis as { __ctMock?: { loginMode?: string } }).__ctMock?.loginMode;
-    return HttpResponse.json(forced === 'redirect' ? { ...loginOptionsFixture, mode: 'redirect' } : loginOptionsFixture);
+    // `admin` n'est jamais proposé en `rest` (ADR 0014 avenant) : redirect par défaut.
+    const redirect = forced === 'redirect' || url.searchParams.get('app') === 'admin';
+    return HttpResponse.json(redirect ? { ...loginOptionsFixture, mode: 'redirect' } : loginOptionsFixture);
   }),
   http.get('*/api/auth/session', ({ request }) => {
     if (typeof document !== 'undefined') {
@@ -92,8 +99,7 @@ export const authHandlers = [
   }),
   http.post('*/api/auth/logout', ({ request }) => {
     if (!csrfOk(request)) return problem(403, 'csrf-invalid', 'Jeton CSRF invalide');
-    // Le cookie présenté désigne le front ; en mock, la session `app` est la seule que ce front lit.
-    sessions.app = { authenticated: false };
+    sessions[frontOf(new URL(request.url).searchParams.get('app'))] = { authenticated: false };
     return new HttpResponse(null, { status: 204 });
   }),
 ];
