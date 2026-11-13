@@ -10,6 +10,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTableModule } from '@angular/material/table';
 import { MissionPage } from '../../../libs/api-clients/missions';
+import { HasFeatureDirective } from '../directives/has-feature.directive';
 import { MissionsFacade } from '../missions.facade';
 
 /**
@@ -31,10 +32,12 @@ import { MissionsFacade } from '../missions.facade';
     MatIconModule,
     MatSlideToggleModule,
     MatProgressBarModule,
+    HasFeatureDirective,
   ],
   template: `
     <section>
       <h1>Missions</h1>
+      <a *hasFeature="'mission.create'" mat-flat-button color="primary" routerLink="/missions/new" data-cy="mission-new">Nouvelle mission</a>
       <mat-card appearance="outlined">
         <mat-card-content>
           <form class="filters" (submit)="$event.preventDefault(); apply(qF.value, fromF.value, toF.value, mineF.checked)">
